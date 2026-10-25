@@ -38,12 +38,12 @@ export function render({quiz, ui}) {
   const place = quiz.place;
   const mine = partiesIn(place);
   const others = PARTIES.filter(p => !mine.includes(p));
-  const shown = ui.showAll || !place ? PARTIES : mine;
+  const shown = ui.showAll.partidos || !place ? PARTIES : mine;
   const extras = OTROS.map(([title, text]) => `<div class="li"><span class="t">${esc(title)}</span><span class="small muted">${annotate(text)}</span></div>`).join('');
   return `
     <div class="res">
       <p class="notice">Candidaturas anunciadas a 24-oct-2026. El plazo para presentar listas acaba el 26-oct; el BOE las publica el 28-oct y se proclaman el 2-nov. Los partidos sin representación necesitan avales del 0,1 % del censo de cada provincia, así que alguno puede quedarse fuera.</p>
-      ${place ? placeCard(place, others, ui.showAll) : ''}
+      ${place ? placeCard(place, others, ui.showAll.partidos) : ''}
       <div class="grid">${shown.map(p => partyCard(p, place, !place || mine.includes(p), quiz.pollsHidden)).join('')}</div>
       <div class="card"><h3>Otras opciones en la papeleta</h3>${extras}</div>
     </div>`;

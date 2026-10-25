@@ -25,7 +25,7 @@ const SHARED_ACTIONS = {
     ctx.go('cuestionario');
   },
   'toggle-all'(ctx) {
-    ctx.ui.showAll = !ctx.ui.showAll;
+    ctx.ui.showAll[ctx.ui.tab] = !ctx.ui.showAll[ctx.ui.tab];
     ctx.refresh();
   },
 };
@@ -42,7 +42,7 @@ export function mount(quiz) {
     picking: false,
     pendingRegion: null,
     openParty: null,
-    showAll: false,
+    showAll: {},
     glossaryQuery: '',
   };
   const ctx = {quiz, ui, refresh, go};

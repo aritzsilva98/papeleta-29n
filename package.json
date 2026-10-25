@@ -1,6 +1,7 @@
 {
   "name": "papeleta-29n",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Test de afinidad para las elecciones generales del 29 de noviembre de 2026. Web estática, sin dependencias.",
   "engines": {

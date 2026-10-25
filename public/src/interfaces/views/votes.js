@@ -24,12 +24,12 @@ function table(rows, columns, caption) {
 
 export function render({quiz, ui}) {
   const place = quiz.place;
-  const cols = COLS.filter(([id]) => ui.showAll || representedIn(byId[id], place));
+  const cols = COLS.filter(([id]) => ui.showAll.votaciones || representedIn(byId[id], place));
   const filter = place ? `
     <div class="card">
       ${whereRow(place)}
       <p class="hint">Columnas: partidos que se presentan donde votas y tienen votos registrados.
-        <button class="linkbtn" data-action="toggle-all">${ui.showAll ? 'Ver solo los míos' : 'Ver todos los partidos'}</button>
+        <button class="linkbtn" data-action="toggle-all">${ui.showAll.votaciones ? 'Ver solo los míos' : 'Ver todos los partidos'}</button>
       </p>
     </div>` : '';
   return `

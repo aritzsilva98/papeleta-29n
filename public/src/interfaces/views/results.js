@@ -122,7 +122,7 @@ export const actions = {
       return;
     }
     ctx.quiz.reset();
-    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: false});
+    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: {}});
     ctx.go('cuestionario');
   },
 };
