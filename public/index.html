@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Copia de la CSP de _headers para hosts que no permiten cabeceras propias (p. ej. GitHub Pages). frame-ancestors solo funciona como cabecera. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Papeleta 29-N · ¿A quién se parece lo que piensas?</title>
+<meta name="description" content="Test de afinidad para las elecciones generales del 29 de noviembre de 2026. Eliges dónde votas y comparas 91 preguntas con los partidos que se presentan allí, con fuentes y votaciones reales.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="src/main.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="ballot">
+    <div class="strip mono">
+      <span><b>Elecciones generales</b> · domingo 29 de noviembre de 2026</span>
+      <span id="circ">Congreso · <b>350</b> escaños en 52 circunscripciones</span>
+      <span><span class="term" tabindex="0" role="button" data-g="dhondt">D'Hondt</span> · <span class="term" tabindex="0" role="button" data-g="barrera">barrera del 3 %</span></span>
+    </div>
+    <h1>Papeleta 29-N</h1>
+    <p class="lede"><span id="nq">91</span> preguntas sobre tus planes, tus prioridades y tu visión moral. Primero eliges dónde votas: solo se comparan los partidos que se presentan en tu comunidad (y tu provincia, si la indicas). Cada respuesta se cruza con lo que defiende cada partido y, cuando existe, con lo que ha votado en el Congreso y en el Parlamento Europeo. Las siglas y términos técnicos <span class="dotted">subrayados con puntos</span> se pueden tocar para ver qué significan y de dónde sale la explicación.</p>
+    <p class="hint">Tus respuestas no salen de tu dispositivo: no hay servidor, ni cuentas, ni cookies, ni analítica.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"><noscript><p class="notice">Esta herramienta necesita JavaScript para calcular el resultado en tu propio navegador.</p></noscript></main>
+</div>
+</body>
+</html>
