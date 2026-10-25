@@ -94,7 +94,7 @@ Si algún día se quiere otro host, basta con servir `public/` como estático. G
 
 ## Mantenimiento
 
-- Los partidos sin representación necesitan avales y las candidaturas se proclaman el 2 de noviembre (BOE del 3): revisa entonces quién se presenta en cada provincia (`domain/data/parties.js`).
+- Los partidos sin representación necesitan avales y las candidaturas se proclaman el 2 de noviembre (BOE del 3): revisa entonces quién se presenta en cada provincia (`domain/data/parties.js`) y cambia el aviso del principio de `index.html`, que hasta entonces dice «Sin actualizar».
 - Cuando salgan los programas, actualiza posiciones y fuentes en `domain/data/questions.js`. Las pruebas avisan si una posición no existe o un partido deja de ganar con sus propias respuestas.
 
 ## Licencia
