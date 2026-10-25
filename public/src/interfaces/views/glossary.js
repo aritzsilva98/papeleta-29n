@@ -1,6 +1,5 @@
 import {GLOSSARY} from '../../domain/data/glossary.js';
-import {esc} from '../html.js';
-import {sourceLink} from './shared.js';
+import {esc, sourceLink} from '../html.js';
 
 const CATEGORIES = [...new Set(GLOSSARY.map(g => g.c))];
 

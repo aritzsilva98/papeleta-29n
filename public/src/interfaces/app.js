@@ -24,15 +24,19 @@ const SHARED_ACTIONS = {
     ctx.ui.picking = true;
     ctx.go('cuestionario');
   },
+  'toggle-all'(ctx) {
+    ctx.ui.showAll = !ctx.ui.showAll;
+    ctx.refresh();
+  },
 };
 
 const tabById = id => TABS.find(t => t.id === id) ?? TABS[0];
 
-export function mount(doc, quiz) {
-  const root = doc.querySelector('#view');
-  const nav = doc.querySelector('#tabs');
-  const header = doc.querySelector('#circ');
-  const bubble = createGlossaryBubble(doc);
+export function mount(quiz) {
+  const root = document.querySelector('#view');
+  const nav = document.querySelector('#tabs');
+  const header = document.querySelector('#circ');
+  const bubble = createGlossaryBubble();
   const ui = {
     tab: tabById(location.hash.slice(1)).id,
     picking: false,
@@ -90,6 +94,6 @@ export function mount(doc, quiz) {
     if (tab) go(tab.dataset.tab);
   });
 
-  doc.querySelector('#nq').textContent = STEPS.length;
+  document.querySelector('#nq').textContent = STEPS.length;
   refresh();
 }

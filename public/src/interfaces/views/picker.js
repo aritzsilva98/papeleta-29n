@@ -1,5 +1,5 @@
 import {REGIONS} from '../../domain/data/regions.js';
-import {regionById, seatsOf} from '../../domain/electoral.js';
+import {hasProvinces, regionById, seatsOf} from '../../domain/electoral.js';
 import {esc} from '../html.js';
 
 function provinces(region, place) {
@@ -46,7 +46,7 @@ function done(ctx) {
 export const actions = {
   region(ctx, el) {
     const region = regionById(el.dataset.ccaa);
-    if (region.p.length > 1) {
+    if (hasProvinces(region)) {
       ctx.ui.pendingRegion = region.id;
       return ctx.refresh();
     }

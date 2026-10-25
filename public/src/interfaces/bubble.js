@@ -1,14 +1,16 @@
-import {GLOSSARY_BY_ID, esc} from './html.js';
-import {sourceLink} from './views/shared.js';
+import {GLOSSARY} from '../domain/data/glossary.js';
+import {esc, sourceLink} from './html.js';
+
+const GLOSSARY_BY_ID = Object.fromEntries(GLOSSARY.map(g => [g.id, g]));
 
 const GAP = 8, MARGIN = 12;
 
-export function createGlossaryBubble(doc) {
-  const bubble = doc.createElement('div');
+export function createGlossaryBubble() {
+  const bubble = document.createElement('div');
   bubble.id = 'bubble';
   bubble.setAttribute('role', 'dialog');
   bubble.hidden = true;
-  doc.body.append(bubble);
+  document.body.append(bubble);
   let anchor = null;
 
   function hide() {
@@ -40,7 +42,7 @@ export function createGlossaryBubble(doc) {
 
   // En fase de captura: un término dentro de un botón (una respuesta, un partido)
   // tiene que abrir su explicación sin que el botón reciba el clic.
-  doc.addEventListener('click', e => {
+  document.addEventListener('click', e => {
     const term = e.target.closest('.term');
     if (term) {
       e.preventDefault();
@@ -50,7 +52,7 @@ export function createGlossaryBubble(doc) {
     if (!e.target.closest('#bubble')) hide();
   }, true);
 
-  doc.addEventListener('keydown', e => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Escape') return hide();
     const term = e.target.closest?.('.term');
     if (term && (e.key === 'Enter' || e.key === ' ')) {

@@ -13,6 +13,17 @@ const POLL_BLACKOUT = ['2026-11-24', '2026-11-29'];
 
 export const regionById = id => REGIONS.find(r => r.id === id);
 
+export const hasProvinces = region => region.p.length > 1;
+
+// En las comunidades de una sola provincia la provincia se rellena sola; en el resto
+// solo se acepta si existe, y si no se queda en null («toda la comunidad»).
+export function makePlace(ccaa, prov = null) {
+  const region = regionById(ccaa);
+  if (!region) return null;
+  if (!hasProvinces(region)) return {ccaa, prov: region.p[0][0]};
+  return {ccaa, prov: region.p.some(([name]) => name === prov) ? prov : null};
+}
+
 const regionSeats = region => region.p.reduce((sum, [, seats]) => sum + seats, 0);
 
 export function seatsOf(place) {
@@ -33,6 +44,10 @@ export function runsIn(party, place) {
 }
 
 export const partiesIn = place => PARTIES.filter(p => runsIn(p, place));
+
+// Compromís-FV y UPC son coaliciones nuevas sin votaciones propias. Donde se presentan,
+// lo útil es ver cómo votó el Frente Amplio, del que heredan posiciones.
+export const representedIn = (party, place) => runsIn(party, place) || partiesIn(place).some(p => p.base === party.id);
 
 export function viability(party, place) {
   if (!place?.ccaa) return party.v._ ?? Object.values(party.v)[0];

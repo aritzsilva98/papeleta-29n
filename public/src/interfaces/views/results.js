@@ -1,5 +1,4 @@
 import {SECTIONS} from '../../domain/data/sections.js';
-import {QUESTIONS} from '../../domain/data/questions.js';
 import {FICHAS, NOTAS} from '../../domain/data/reference.js';
 import {ballotName, leadCandidate, partiesIn} from '../../domain/electoral.js';
 import {agreementLevel, hasLowCoverage, highlights, optionText} from '../../domain/scoring.js';
@@ -44,7 +43,7 @@ function breakdown(result, place) {
     </div>`;
 }
 
-function partyRow(result, place, open) {
+function partyRow(result, place, open, pollsHidden) {
   const {party, pct, rows, coverage} = result;
   return `
     <div class="pr">
@@ -52,7 +51,7 @@ function partyRow(result, place, open) {
         <span class="nm">${esc(ballotName(party, place))} <span class="muted small">· ${esc(leadCandidate(party, place))}</span></span>
         <span class="pct">${pct == null ? '—' : Math.round(pct) + ' %'}</span>
         <span class="chips">
-          ${viabilityChip(party, place)}
+          ${viabilityChip(party, place, pollsHidden)}
           <span class="chip">${rows.length} temas comparables · cobertura ${Math.round(coverage * 100)} %</span>
           ${hasLowCoverage(result) ? '<span class="chip improbable">Pocos datos</span>' : ''}
         </span>
@@ -66,10 +65,12 @@ function usefulVoteNotice({closest, onEdge, askProvince}, place) {
   const name = p => esc(ballotName(p, place));
   const [first, second] = closest;
   const edge = onEdge.map(p => ballotName(p, place));
-  return `
-    <p class="notice">Te importa que tu voto cuente. Entre los partidos con opciones de escaño en ${esc(placeLabel(place))}, el más cercano a ti es <b>${first ? name(first) : '—'}</b>${second ? `, seguido de <b>${name(second)}</b>` : ''}.${
-      edge.length ? ` ${esc(edge.join(' y '))} ${edge.length > 1 ? 'están' : 'está'} en el filo del 3 %.` : ''}${
-      askProvince ? ' Indica tu provincia para afinar: en las pequeñas solo los grandes sacan escaño.' : ''}</p>`;
+  const sentences = [
+    `Te importa que tu voto cuente. Entre los partidos con opciones de escaño en ${esc(placeLabel(place))}, el más cercano a ti es <b>${first ? name(first) : '—'}</b>${second ? `, seguido de <b>${name(second)}</b>` : ''}.`,
+  ];
+  if (edge.length) sentences.push(`${esc(edge.join(' y '))} ${edge.length > 1 ? 'están' : 'está'} en el filo del 3 %.`);
+  if (askProvince) sentences.push('Indica tu provincia para afinar: en las pequeñas solo los grandes sacan escaño.');
+  return `<p class="notice">${sentences.join(' ')}</p>`;
 }
 
 export function render({quiz, ui}) {
@@ -80,7 +81,7 @@ export function render({quiz, ui}) {
   }
   if (res.status === 'too-few') {
     return prompt('Aún faltan respuestas',
-      `Llevas ${res.answered} de ${QUESTIONS.length}. Con menos de ${res.needed} el resultado no dice nada. Las preguntas que dejes sin opinión no cuentan.`,
+      `Llevas ${res.answered} de ${res.total}. Con menos de ${res.needed} el resultado no dice nada. Las preguntas que dejes sin opinión no cuentan.`,
       'Seguir respondiendo') + ballotStrip(place);
   }
 
@@ -95,7 +96,7 @@ export function render({quiz, ui}) {
         ${note ? `<p class="hint">${annotate(note)}</p>` : ''}
         ${res.usefulVote ? usefulVoteNotice(res.usefulVote, place) : ''}
       </div>
-      ${res.ranking.map(r => partyRow(r, place, ui.openParty === r.party.id)).join('')}
+      ${res.ranking.map(r => partyRow(r, place, ui.openParty === r.party.id, quiz.pollsHidden)).join('')}
       <p class="notice">Esto mide coincidencias con programas y votos, no te dice a quién votar. A 24-oct casi ningún partido ha publicado el programa del 29-N: lee su ficha antes de decidir, sobre todo si está arriba con «pocos datos».</p>
       <div class="row">
         <button class="btn" data-action="review">Repasar respuestas</button>
@@ -121,7 +122,7 @@ export const actions = {
       return;
     }
     ctx.quiz.reset();
-    ctx.ui.openParty = null;
+    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: false});
     ctx.go('cuestionario');
   },
 };

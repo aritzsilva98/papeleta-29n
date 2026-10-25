@@ -1,11 +1,11 @@
 import {PLANS, QUESTIONS} from '../domain/data/questions.js';
-import {hasSeatChance, pollsHidden, regionById, viability} from '../domain/electoral.js';
-import {isAnswered, score, sectionWeights} from '../domain/scoring.js';
+import {hasSeatChance, makePlace, pollsHidden, viability} from '../domain/electoral.js';
+import {isAnswered, options, score, sectionWeights} from '../domain/scoring.js';
 
 const WEIGHTS = [0.5, 1, 2];
 const MIN_ANSWERS = 8;
 const USEFUL_VOTE_FROM = 2;
-const QUESTION_IDS = new Set(QUESTIONS.map(q => q.id));
+const POSITIONS = new Map(QUESTIONS.map(q => [q.id, new Set(options(q).map(o => o.x))]));
 
 export const STEPS = [
   ...PLANS.map(plan => ({kind: 'plan', item: plan, section: 'planes'})),
@@ -13,6 +13,7 @@ export const STEPS = [
 ];
 
 const empty = () => ({step: 0, answers: {}, plans: {}, place: null});
+const clampStep = step => Math.max(0, Math.min(step, STEPS.length - 1));
 
 // Lo que viene del almacenamiento lo puede haber tocado cualquiera, así que solo
 // aceptamos lo que encaja con las preguntas y circunscripciones que existen.
@@ -21,21 +22,23 @@ export function sanitize(raw) {
 
   const answers = {};
   for (const [id, a] of Object.entries(raw.answers ?? {})) {
-    if (!QUESTION_IDS.has(id) || !a || typeof a !== 'object') continue;
-    const v = a.v === null || Number.isFinite(a.v) ? a.v : undefined;
+    if (!POSITIONS.has(id) || !a || typeof a !== 'object') continue;
+    const v = a.v === null || POSITIONS.get(id).has(a.v) ? a.v : undefined;
     answers[id] = {v, w: WEIGHTS.includes(a.w) ? a.w : 1};
   }
 
   const plans = {};
   for (const plan of PLANS) {
     const v = raw.plans?.[plan.id];
-    if (plan.multi && Array.isArray(v)) plans[plan.id] = v.filter(k => plan.o.some(o => o.sec === k)).slice(0, plan.multi);
-    else if (Number.isInteger(v) && v >= 0 && v < plan.o.length) plans[plan.id] = v;
+    if (plan.multi) {
+      if (Array.isArray(v)) plans[plan.id] = [...new Set(v)].filter(k => plan.o.some(o => o.sec === k)).slice(0, plan.multi);
+    } else if (Number.isInteger(v) && v >= 0 && v < plan.o.length) {
+      plans[plan.id] = v;
+    }
   }
 
-  const region = raw.place && regionById(raw.place.ccaa);
-  const place = region ? {ccaa: region.id, prov: region.p.some(([p]) => p === raw.place.prov) ? raw.place.prov : null} : null;
-  const step = place && Number.isInteger(raw.step) ? Math.max(0, Math.min(raw.step, STEPS.length - 1)) : 0;
+  const place = raw.place ? makePlace(raw.place.ccaa, raw.place.prov) : null;
+  const step = place && Number.isInteger(raw.step) ? clampStep(raw.step) : 0;
   return {answers, plans, place, step};
 }
 
@@ -47,7 +50,7 @@ export function createQuiz(storage) {
   const answerOf = id => s.answers[id] ?? {w: 1};
   const answeredCount = () => QUESTIONS.filter(q => isAnswered(s.answers[q.id])).length;
   const goTo = step => {
-    s.step = Math.max(0, Math.min(step, STEPS.length - 1));
+    s.step = clampStep(step);
     save();
   };
 
@@ -56,7 +59,7 @@ export function createQuiz(storage) {
     return {
       closest: ranking.filter(r => hasSeatChance(r.party, s.place)).slice(0, 2).map(r => r.party),
       onEdge: ranking.filter(r => viability(r.party, s.place) === 'filo').map(r => r.party),
-      askProvince: !s.place.prov && regionById(s.place.ccaa).p.length > 1,
+      askProvince: !s.place.prov,
     };
   }
 
@@ -65,6 +68,7 @@ export function createQuiz(storage) {
     get step() { return s.step; },
     get current() { return STEPS[s.step]; },
     get isLast() { return s.step === STEPS.length - 1; },
+    get pollsHidden() { return pollsHidden(); },
     answerOf,
     answeredCount,
     goTo,
@@ -79,8 +83,7 @@ export function createQuiz(storage) {
     },
 
     choosePlace(ccaa, prov = null) {
-      const region = regionById(ccaa);
-      s.place = {ccaa, prov: prov ?? (region.p.length === 1 ? region.p[0][0] : null)};
+      s.place = makePlace(ccaa, prov);
       save();
     },
 
@@ -114,7 +117,7 @@ export function createQuiz(storage) {
     results() {
       if (!s.place) return {status: 'no-place'};
       const answered = answeredCount();
-      if (answered < MIN_ANSWERS) return {status: 'too-few', answered, needed: MIN_ANSWERS};
+      if (answered < MIN_ANSWERS) return {status: 'too-few', answered, needed: MIN_ANSWERS, total: QUESTIONS.length};
       const ranking = score(s.answers, s.plans, s.place);
       const weights = sectionWeights(s.plans);
       const boosted = Object.keys(weights).filter(k => k !== 'planes' && weights[k] > 1);

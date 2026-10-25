@@ -1,5 +1,5 @@
 import {SOURCES} from '../../domain/data/reference.js';
-import {sourceLink} from './shared.js';
+import {sourceLink} from '../html.js';
 
 export const render = () => `
     <div class="card prose">

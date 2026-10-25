@@ -13,6 +13,11 @@ test('marca términos del glosario respetando mayúsculas y límites de palabra'
   assert.ok(!annotate('PACMA').includes('data-g="pac"'));
 });
 
+test('marca términos pegados a signos de puntuación', () => {
+  assert.ok(annotate('(IRPF)').startsWith('(<span'));
+  assert.ok(annotate('IVA,IRPF').includes('data-g="irpf"'));
+});
+
 test('cada término se marca una sola vez por bloque', () => {
   assert.equal(annotate('IRPF, IRPF e IRPF').match(/data-g="irpf"/g).length, 1);
 });

@@ -22,11 +22,10 @@ export const optionText = (question, x) => options(question).find(o => o.x === x
 
 export function sectionWeights(plans) {
   const weights = Object.fromEntries(Object.keys(SECTIONS).map(k => [k, 1]));
-  for (const section of plans.prio ?? []) weights[section] += 1;
   for (const plan of PLANS) {
-    const boost = plan.o[plans[plan.id]]?.b;
-    if (typeof plans[plan.id] !== 'number' || !boost) continue;
-    for (const [section, extra] of Object.entries(boost)) weights[section] += extra;
+    const picked = plans[plan.id];
+    if (plan.multi) for (const section of picked ?? []) weights[section] += 1;
+    else for (const [section, extra] of Object.entries(plan.o[picked]?.b ?? {})) weights[section] += extra;
   }
   for (const k in weights) weights[k] = Math.min(weights[k], MAX_SECTION_WEIGHT);
   return weights;

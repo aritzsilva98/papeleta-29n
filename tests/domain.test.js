@@ -5,8 +5,8 @@ import {REGIONS} from '../public/src/domain/data/regions.js';
 import {PARTIES} from '../public/src/domain/data/parties.js';
 import {QUESTIONS} from '../public/src/domain/data/questions.js';
 import {FICHAS, COLS, VOTES_CONG, VOTES_EU} from '../public/src/domain/data/reference.js';
-import {partiesIn, pollsHidden, runsIn, totalSeats, viability} from '../public/src/domain/electoral.js';
-import {options, score} from '../public/src/domain/scoring.js';
+import {makePlace, partiesIn, pollsHidden, representedIn, runsIn, totalSeats, viability} from '../public/src/domain/electoral.js';
+import {options, score, sectionWeights} from '../public/src/domain/scoring.js';
 
 const party = id => PARTIES.find(p => p.id === id);
 const idsIn = place => partiesIn(place).map(p => p.id);
@@ -79,4 +79,25 @@ test('la veda de encuestas va en hora peninsular', () => {
   assert.ok(pollsHidden(new Date('2026-11-23T23:30:00Z')));
   assert.ok(pollsHidden(new Date('2026-11-29T20:00:00Z')));
   assert.ok(!pollsHidden(new Date('2026-11-30T00:00:00Z')));
+});
+
+test('la provincia se rellena sola si la comunidad solo tiene una', () => {
+  assert.deepEqual(makePlace('mad'), {ccaa: 'mad', prov: 'Madrid'});
+  assert.deepEqual(makePlace('cyl', 'Soria'), {ccaa: 'cyl', prov: 'Soria'});
+  assert.deepEqual(makePlace('cyl', 'Gotham'), {ccaa: 'cyl', prov: null});
+  assert.equal(makePlace('nope'), null);
+});
+
+test('el Frente Amplio sigue contando donde va dentro de otra coalición', () => {
+  assert.ok(!runsIn(party('fa'), {ccaa: 'val'}) && representedIn(party('fa'), {ccaa: 'val'}));
+  assert.ok(representedIn(party('fa'), {ccaa: 'can'}));
+  assert.ok(!representedIn(party('pod'), {ccaa: 'val'}));
+});
+
+test('los planes suben el peso de sus bloques sin pasar de tres', () => {
+  const w = sectionWeights({prio: ['vivienda', 'fiscal'], casa: 1, curro: 1});
+  assert.equal(w.vivienda, 3);
+  assert.equal(w.fiscal, 3);
+  assert.equal(w.trabajo, 1.5);
+  assert.equal(w.sanidad, 1);
 });

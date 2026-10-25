@@ -4,7 +4,7 @@ const ENTITIES = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&
 
 export const esc = s => String(s).replace(/[&<>"']/g, c => ENTITIES[c]);
 
-export const GLOSSARY_BY_ID = Object.fromEntries(GLOSSARY.map(g => [g.id, g]));
+export const sourceLink = ([label, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`;
 
 const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const isAcronym = alias => /\p{Lu}.*\p{Lu}/u.test(alias) && alias === alias.toUpperCase();
@@ -19,17 +19,18 @@ for (const x of ALIASES) {
   BY_ALIAS.set(key, [...(BY_ALIAS.get(key) ?? []), x]);
 }
 
-const TERM_RE = new RegExp(`(?<![\\p{L}\\p{N}])(?:${ALIASES.map(x => escapeRegExp(x.alias)).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
+// Sin lookbehind a propósito: Safari no lo entiende hasta iOS 16.4 y la página se quedaría en blanco.
+const TERM_RE = new RegExp(`(^|[^\\p{L}\\p{N}])(${ALIASES.map(x => escapeRegExp(x.alias)).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
 
-export const termButton = (id, label) => `<span class="term" tabindex="0" role="button" data-g="${id}">${label}</span>`;
+const termButton = (id, label) => `<span class="term" tabindex="0" role="button" data-g="${id}">${label}</span>`;
 
 // Escapa el texto y convierte en botón los términos del glosario. Cada término se marca
 // solo la primera vez que sale en un mismo bloque; si no, la pantalla se llena de subrayados.
 export function annotate(text, seen = new Set()) {
-  return esc(text).replace(TERM_RE, match => {
+  return esc(text).replace(TERM_RE, (whole, before, match) => {
     const hit = BY_ALIAS.get(match.toLowerCase())?.find(x => !x.caseSensitive || x.alias === match);
-    if (!hit || seen.has(hit.term.id)) return match;
+    if (!hit || seen.has(hit.term.id)) return whole;
     seen.add(hit.term.id);
-    return termButton(hit.term.id, match);
+    return before + termButton(hit.term.id, match);
   });
 }

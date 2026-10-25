@@ -11,15 +11,16 @@ function memoryStore() {
 test('descarta lo guardado que no encaja con los datos', () => {
   assert.equal(sanitize('x'), null);
   const s = sanitize({
-    answers: {smi: {v: 2, w: 9}, hack: {v: 1}, iva: {v: '<img>'}},
-    plans: {prio: ['vivienda', 'nope'], casa: 99},
+    answers: {smi: {v: 2, w: 9}, hack: {v: 1}, iva: {v: '<img>'}, irpf: {v: 1e308}},
+    plans: {prio: ['vivienda', 'vivienda', 'nope'], casa: 99},
     place: {ccaa: 'cyl', prov: '<b>'},
     step: 1e9,
   });
-  assert.deepEqual(s.answers, {smi: {v: 2, w: 1}, iva: {v: undefined, w: 1}});
+  assert.deepEqual(s.answers, {smi: {v: 2, w: 1}, iva: {v: undefined, w: 1}, irpf: {v: undefined, w: 1}});
   assert.deepEqual(s.plans, {prio: ['vivienda']});
   assert.deepEqual(s.place, {ccaa: 'cyl', prov: null});
   assert.equal(s.step, STEPS.length - 1);
+  assert.deepEqual(sanitize({plans: {prio: 1}}).plans, {}, 'un número en una pregunta múltiple rompía la página');
 });
 
 test('recuerda las respuestas entre visitas', () => {

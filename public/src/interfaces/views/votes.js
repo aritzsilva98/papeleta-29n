@@ -1,6 +1,6 @@
 import {PARTIES} from '../../domain/data/parties.js';
 import {COLS, PILL, VOTES_CONG, VOTES_EU} from '../../domain/data/reference.js';
-import {runsIn} from '../../domain/electoral.js';
+import {representedIn} from '../../domain/electoral.js';
 import {annotate, esc} from '../html.js';
 import {whereRow} from './shared.js';
 
@@ -24,9 +24,7 @@ function table(rows, columns, caption) {
 
 export function render({quiz, ui}) {
   const place = quiz.place;
-  // La columna de Sumar / FA se queda también en Valencia y Canarias: allí no se presenta
-  // como tal, pero Compromís y los de UPC votan dentro de ese grupo.
-  const cols = COLS.filter(([id]) => ui.showAll || !place || runsIn(byId[id], place) || id === 'fa');
+  const cols = COLS.filter(([id]) => ui.showAll || representedIn(byId[id], place));
   const filter = place ? `
     <div class="card">
       ${whereRow(place)}
@@ -43,10 +41,3 @@ export function render({quiz, ui}) {
       <p class="hint">Sumar / FA = Movimiento Sumar y Comuns. ERC, Bildu y BNG comparten la candidatura europea Ahora Repúblicas (un eurodiputado cada uno). Junts solo tuvo eurodiputados en la legislatura 2019-2024. «—» = no votó o no tenía eurodiputados. Datos nominales de HowTheyVote.eu, agregados por partido español.</p>
     </div>`;
 }
-
-export const actions = {
-  'toggle-all'(ctx) {
-    ctx.ui.showAll = !ctx.ui.showAll;
-    ctx.refresh();
-  },
-};

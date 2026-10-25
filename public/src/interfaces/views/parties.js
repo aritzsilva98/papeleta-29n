@@ -2,7 +2,7 @@ import {PARTIES} from '../../domain/data/parties.js';
 import {FICHAS, NOTAS, OTROS} from '../../domain/data/reference.js';
 import {ballotName, leadCandidate, partiesIn} from '../../domain/electoral.js';
 import {annotate, esc} from '../html.js';
-import {BLACKOUT, BLACKOUT_TEXT, viabilityChip, whereRow} from './shared.js';
+import {BLACKOUT_TEXT, viabilityChip, whereRow} from './shared.js';
 
 function placeCard(place, others, showAll) {
   const note = NOTAS[place.ccaa];
@@ -13,16 +13,16 @@ function placeCard(place, others, showAll) {
   return `<div class="card">${whereRow(place)}${note ? `<p class="hint">${annotate(note)}</p>` : ''}${absent}</div>`;
 }
 
-function partyCard(party, place, runsHere) {
+function partyCard(party, place, runsHere, pollsHidden) {
   const f = FICHAS[party.id];
   const seen = new Set([party.id]);
   const field = (label, text) => `<div><b>${label}</b>${annotate(text, seen)}</div>`;
   return `
     <details class="party">
       <summary>
-        <span class="row"><h3>${esc(ballotName(party, place))}</h3>${runsHere ? viabilityChip(party, place) : '<span class="chip">No se presenta aquí</span>'}</span>
+        <span class="row"><h3>${esc(ballotName(party, place))}</h3>${runsHere ? viabilityChip(party, place, pollsHidden) : '<span class="chip">No se presenta aquí</span>'}</span>
         <span class="small muted">${annotate(party.full, seen)} · ${esc(leadCandidate(party, place))}</span>
-        <span class="small">${annotate(BLACKOUT ? BLACKOUT_TEXT : party.poll, seen)}</span>
+        <span class="small">${annotate(pollsHidden ? BLACKOUT_TEXT : party.poll, seen)}</span>
       </summary>
       <div class="kv">
         ${field('Qué es', f.res)}
@@ -44,14 +44,7 @@ export function render({quiz, ui}) {
     <div class="res">
       <p class="notice">Candidaturas anunciadas a 24-oct-2026. El plazo para presentar listas acaba el 26-oct; el BOE las publica el 28-oct y se proclaman el 2-nov. Los partidos sin representación necesitan avales del 0,1 % del censo de cada provincia, así que alguno puede quedarse fuera.</p>
       ${place ? placeCard(place, others, ui.showAll) : ''}
-      <div class="grid">${shown.map(p => partyCard(p, place, !place || mine.includes(p))).join('')}</div>
+      <div class="grid">${shown.map(p => partyCard(p, place, !place || mine.includes(p), quiz.pollsHidden)).join('')}</div>
       <div class="card"><h3>Otras opciones en la papeleta</h3>${extras}</div>
     </div>`;
 }
-
-export const actions = {
-  'toggle-all'(ctx) {
-    ctx.ui.showAll = !ctx.ui.showAll;
-    ctx.refresh();
-  },
-};

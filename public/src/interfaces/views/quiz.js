@@ -12,8 +12,8 @@ const IMPORTANCE = [[0.5, 'Poco'], [1, 'Normal'], [2, 'Mucho']];
 const option = (attrs, pressed, key, text) =>
   `<button class="opt" aria-pressed="${pressed}" ${attrs}><span class="k">${key}</span><span>${text}</span></button>`;
 
-function sidebar(quiz) {
-  return quiz.progress().map(p => `
+function sidebar(quiz, progress) {
+  return progress.map(p => `
     <button data-action="jump" data-step="${p.first}" class="${quiz.current.section === p.section ? 'on' : ''}">
       <span>${SECTIONS[p.section]}</span><span class="cnt">${p.done}/${p.total}</span>
     </button>`).join('');
@@ -48,22 +48,23 @@ export function render(ctx) {
 
   const {kind, item, section} = quiz.current;
   const isPlan = kind === 'plan';
-  const inSection = STEPS.filter(st => st.section === section);
+  const progress = quiz.progress();
+  const here = progress.find(p => p.section === section);
   const answer = quiz.answerOf(item.id);
   const seen = new Set();
   const title = annotate(item.q, seen);
   const context = item.ctx ? annotate(item.ctx, seen) : '';
   const choices = isPlan ? planOptions(item, quiz.planOf(item.id), seen) : questionOptions(item, answer, seen);
-  const progress = Math.round(quiz.step / (STEPS.length - 1) * 100);
+  const done = Math.round(quiz.step / (STEPS.length - 1) * 100);
 
   return `
     <div class="quiz">
-      <aside class="side" aria-label="Bloques">${sidebar(quiz)}</aside>
+      <aside class="side" aria-label="Bloques">${sidebar(quiz, progress)}</aside>
       <section class="card" aria-live="polite">
         ${whereRow(quiz.place)}
-        <div class="progress" aria-hidden="true"><i data-bar="${progress}"></i></div>
+        <div class="progress" aria-hidden="true"><i data-bar="${done}"></i></div>
         <div class="qhead">
-          <span class="mono muted">${SECTIONS[section]} · ${inSection.indexOf(quiz.current) + 1} de ${inSection.length} · pregunta ${quiz.step + 1} de ${STEPS.length}</span>
+          <span class="mono muted">${SECTIONS[section]} · ${quiz.step - here.first + 1} de ${here.total} · pregunta ${quiz.step + 1} de ${STEPS.length}</span>
           <h2>${title}</h2>
           ${context ? `<p class="ctx">${context}</p>` : ''}
         </div>
@@ -95,7 +96,8 @@ export const actions = {
   plan(ctx, el) {
     const plan = ctx.quiz.current.item;
     ctx.quiz.choosePlan(plan, Number(el.dataset.index));
-    plan.multi ? ctx.refresh() : next(ctx);
+    if (plan.multi) ctx.refresh();
+    else next(ctx);
   },
   answer(ctx, el) {
     const v = el.dataset.v === 'na' ? null : Number(el.dataset.v);
