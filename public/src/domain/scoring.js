@@ -1,33 +1,79 @@
-import {SECTIONS} from './sections.js';
-import {PLANS,QUESTIONS} from './questions.js';
-import {partiesFor} from './electoral.js';
+import {SECTIONS} from './data/sections.js';
+import {PLANS, QUESTIONS} from './data/questions.js';
+import {partiesIn} from './electoral.js';
 
-/* Opciones de una pregunta, ordenadas por posición en el eje. */
-function options(q){return [...q.o.map((t,i)=>({t,x:i})),...(q.e||[]).map(([x,t])=>({t,x}))].sort((a,b)=>a.x-b.x)}
-function optText(q,x){const o=options(q).find(o=>o.x===x); return o?o.t:''}
+const MAX_SECTION_WEIGHT = 3;
+// Cada partido arranca con tres preguntas imaginarias al 50 %. Así uno con dos o tres
+// posiciones documentadas no se cuela arriba solo porque coincidan por casualidad.
+const PRIOR = 3;
+const MATCH = 0.75;
+const CLASH = 0.5;
+const LOW_COVERAGE = 0.35;
 
-function sectionWeights(plans){
-  const w={}; for(const k in SECTIONS) w[k]=1;
-  for(const k of (plans.prio||[])) w[k]+=1;
-  for(const p of PLANS){ const i=plans[p.id]; if(typeof i==='number' && p.o[i] && p.o[i].b) for(const k in p.o[i].b) w[k]+=p.o[i].b[k]; }
-  for(const k in w) w[k]=Math.min(w[k],3);
-  return w;
+export const isAnswered = answer => typeof answer?.v === 'number';
+
+export function options(question) {
+  const base = question.o.map((t, x) => ({t, x}));
+  const extra = (question.e ?? []).map(([x, t]) => ({t, x}));
+  return [...base, ...extra].sort((a, b) => a.x - b.x);
 }
 
-// ponytail: suavizado bayesiano con K=3 para que un partido con pocas posiciones no salga arriba por casualidad
-function score(answers,plans,sel){
-  const sw=sectionWeights(plans), K=3;
-  return partiesFor(sel).map(p=>{
-    let num=0,den=0,tot=0; const rows=[];
-    for(const q of QUESTIONS){
-      const a=answers[q.id]; if(!a||typeof a.v!=='number') continue;
-      const w=sw[q.s]*a.w; tot+=w;
-      const m=q.m[p.id]; if(!m) continue;
-      const xs=options(q).map(o=>o.x), span=Math.max(...xs)-Math.min(...xs);
-      const d=1-Math.abs(a.v-m[0])/span;
-      num+=w*d; den+=w; rows.push({q,d,w,m,u:a.v});
-    }
-    return {p,rows,cov:tot?den/tot:0,n:rows.length,raw:den?num/den*100:null,pct:den?(num+K*.5)/(den+K)*100:null};
-  }).sort((a,b)=>(b.pct??-1)-(a.pct??-1));
+export const optionText = (question, x) => options(question).find(o => o.x === x)?.t ?? '';
+
+export function sectionWeights(plans) {
+  const weights = Object.fromEntries(Object.keys(SECTIONS).map(k => [k, 1]));
+  for (const section of plans.prio ?? []) weights[section] += 1;
+  for (const plan of PLANS) {
+    const boost = plan.o[plans[plan.id]]?.b;
+    if (typeof plans[plan.id] !== 'number' || !boost) continue;
+    for (const [section, extra] of Object.entries(boost)) weights[section] += extra;
+  }
+  for (const k in weights) weights[k] = Math.min(weights[k], MAX_SECTION_WEIGHT);
+  return weights;
 }
-export {options,optText,sectionWeights,score};
+
+function scoreParty(party, answers, weights) {
+  let agreement = 0, compared = 0, answered = 0;
+  const rows = [];
+  for (const question of QUESTIONS) {
+    const answer = answers[question.id];
+    if (!isAnswered(answer)) continue;
+    const weight = weights[question.s] * answer.w;
+    answered += weight;
+    const position = question.m[party.id];
+    if (!position) continue;
+    const xs = options(question).map(o => o.x);
+    const closeness = 1 - Math.abs(answer.v - position[0]) / (Math.max(...xs) - Math.min(...xs));
+    agreement += weight * closeness;
+    compared += weight;
+    rows.push({question, closeness, weight, position, answer: answer.v});
+  }
+  return {
+    party,
+    rows,
+    coverage: answered ? compared / answered : 0,
+    pct: compared ? (agreement + PRIOR * 0.5) / (compared + PRIOR) * 100 : null,
+  };
+}
+
+export function score(answers, plans, place) {
+  const weights = sectionWeights(plans);
+  return partiesIn(place)
+    .map(party => scoreParty(party, answers, weights))
+    .sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
+}
+
+export const hasLowCoverage = result => result.coverage < LOW_COVERAGE;
+
+export function highlights(result, limit = 6) {
+  const byWeight = (a, b) => b.weight - a.weight;
+  return {
+    matches: result.rows.filter(r => r.closeness >= MATCH).sort((a, b) => b.closeness - a.closeness || byWeight(a, b)).slice(0, limit),
+    clashes: result.rows.filter(r => r.closeness <= CLASH).sort((a, b) => a.closeness - b.closeness || byWeight(a, b)).slice(0, limit),
+  };
+}
+
+export function agreementLevel(closeness) {
+  if (closeness >= MATCH) return 'good';
+  return closeness >= CLASH ? 'mid' : 'bad';
+}

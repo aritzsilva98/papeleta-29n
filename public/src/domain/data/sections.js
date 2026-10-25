@@ -1,0 +1,3 @@
+export const SECTIONS={planes:'Tus planes',trabajo:'Trabajo y economía',fiscal:'Impuestos',vivienda:'Vivienda',social:'Pensiones y protección social',sanidad:'Sanidad y bioética',educacion:'Educación',migracion:'Inmigración',justicia:'Seguridad y justicia',territorio:'Estado y territorio',igualdad:'Igualdad y sociedad',clima:'Energía y clima',rural:'Campo, rural y transporte',exterior:'Europa y exterior',digital:'Tecnología y digital',instituciones:'Instituciones'};
+
+export const VIABILITY={seguro:'Escaño casi seguro',probable:'Escaño probable',filo:'En el filo del 3 %',incierto:'Escaño incierto',improbable:'Escaño improbable',nc:'Candidatura sin confirmar'};

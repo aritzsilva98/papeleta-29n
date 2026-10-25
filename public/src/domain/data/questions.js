@@ -1,7 +1,7 @@
 import {SECTIONS} from './sections.js';
-import {PARTIES} from './electoral.js';
+import {PARTIES} from './parties.js';
 
-/* Preguntas de planes personales: no puntúan; multiplican el peso de los bloques que más te afectan. */
+// Los planes no puntúan: suben el peso de los bloques que más te van a afectar.
 const PLANS=[
  {id:'prio',multi:4,t:'Prioridades',q:'¿Qué temas van a pesar más en tu vida en los próximos cinco años?',ctx:'Elige hasta cuatro. Esos bloques contarán el doble en el resultado.',o:Object.keys(SECTIONS).filter(k=>k!=='planes').map(k=>({t:SECTIONS[k],sec:k}))},
  {id:'casa',t:'Vivienda',q:'¿Cómo te ves viviendo dentro de cinco años?',o:[{t:'De alquiler',b:{vivienda:1}},{t:'Comprando mi primera vivienda',b:{vivienda:1,fiscal:.5}},{t:'En vivienda pública o protegida',b:{vivienda:1}},{t:'En una casa propia ya pagada o heredada',b:{fiscal:.5}},{t:'Fuera de España',b:{exterior:.5}},{t:'Con mi familia, sin cambios',b:{}}]},
@@ -10,7 +10,7 @@ const PLANS=[
  {id:'util',t:'Voto útil',q:'¿Cuánto te importa que tu voto se traduzca en un escaño?',ctx:'No cambia la puntuación. Cambia cómo te mostramos el resultado: cuantos menos escaños reparte tu provincia, más votos hacen falta para sacar uno.',o:[{t:'Nada: voto por convicción aunque no saque escaño'},{t:'Poco'},{t:'Algo: lo tendré en cuenta si dudo entre dos'},{t:'Bastante'},{t:'Mucho: solo votaría a quien tenga opciones reales en mi provincia'}]}
 ];
 
-/* Preguntas puntuables. Opciones ordenadas de un polo a otro; m = posición de cada partido [índice, fuente]. */
+// Las opciones (o) van de un extremo al otro del eje. m guarda dónde cae cada partido: [posición, fuente].
 const QUESTIONS=[
  {id:'smi',s:'trabajo',t:'Salario mínimo',q:'¿Cómo debería evolucionar el salario mínimo?',ctx:'Hoy lo fija el Gobierno cada año tras negociar con sindicatos y patronal.',
   o:['Subirlo con fuerza por ley: 1.800 €/mes o el 75 % del salario medio','Garantizar por ley que nunca baje del 60 % del salario medio y seguir subiéndolo','Actualizarlo según el coste de la vida, sin grandes saltos','Fijarlo solo con acuerdo entre sindicatos y patronal','No subirlo a costa de las empresas: subir el sueldo neto bajando cotizaciones e IRPF'],
@@ -182,7 +182,6 @@ const QUESTIONS=[
   m:{pp:[0,'Defiende el marco constitucional'],psoe:[1,'Plan anticorrupción 2025'],pacma:[1,'Eliminar aforamientos'],d21:[2,'Echar al 90 % de los asesores'],salf:[2,'Presentación oct. 2025'],fa:[3,'Estado plurinacional'],vox:[3,'Recentralizar el Estado'],pod:[3,'Referéndum sobre la monarquía'],ie:[3,'Suprimir los derechos forales'],iue:[4,'Elección directa del presidente'],fo:[4,'Proceso constituyente']}}
 ];
 
-/* Temas añadidos en la v2 */
 QUESTIONS.push(
  {id:'herencia',s:'social',t:'Herencia universal',q:'¿Qué ayuda directa debería dar el Estado a la gente?',
   o:['Una renta básica universal para todo el mundo, sin condiciones','Una «herencia universal»: 20.000 € a cada joven a los 18 años para estudiar o emprender','Reforzar el Ingreso Mínimo Vital y la ayuda por crianza','Ayudas solo si se busca empleo o se hace formación','Recortar subsidios: el empleo es la mejor política social'],
@@ -242,7 +241,7 @@ QUESTIONS.push(
   m:{fa:[0,'Quiere reeditar la coalición'],pod:[0,'Apoyó la investidura de 2023'],psoe:[0,'Sánchez: «continuidad del proyecto progresista»'],d21:[2,'Quiere romper «los dos bloques férreos»'],pp:[3,'Aspira a gobernar en solitario'],vox:[4,'Fija tres condiciones para pactar con Feijóo'],salf:[4,'Propuso al PP y a Vox una candidatura conjunta al Senado']}}
 );
 
-/* Respuestas extra para las preguntas de la v1: [posición, texto]. Las posiciones .5 son intermedias; -0,5 y 4,5 amplían los extremos. */
+// Respuestas intermedias y extremos más radicales: [posición, texto]. Un .5 cae entre dos opciones; -0.5 y 4.5 se salen del eje original.
 const EXTRAS={
  smi:[[0.5,'Subirlo cada año por encima del IPC hasta el 70 % del salario medio'],[3.5,'Congelarlo mientras el paro siga alto'],[4.5,'Suprimirlo: que cada convenio fije sus salarios']],
  jornada:[[-0.5,'Semana de cuatro días obligatoria ya en todos los sectores'],[2.5,'Reducción por ley, con ayudas a pymes y autónomos para compensar'],[3.5,'Incentivos fiscales a las empresas que la reduzcan voluntariamente']],
@@ -299,7 +298,6 @@ const EXTRAS={
 };
 for(const q of QUESTIONS) if(EXTRAS[q.id]) q.e=EXTRAS[q.id];
 
-/* Temas añadidos en la v3 (24-oct-2026) */
 QUESTIONS.push(
  {id:'autonomos',s:'trabajo',t:'Autónomos',q:'¿Cómo deben cotizar los autónomos?',ctx:'Desde 2023 se cotiza por tramos de ingresos reales, con una transición hasta 2032. En 2026 el Gobierno retiró la subida de cuotas porque casi todo el Congreso, Sumar incluido, se oponía.',
   o:['Por ingresos reales, igual que un asalariado, aunque suba la cuota a muchos','Completar el sistema de ingresos reales con subidas graduales','Ingresos reales, pero congelando las cuotas mientras dure la transición','Sin cuota para quien gane menos del SMI y tarifa cero al empezar','Cuota mínima baja y libertad para elegir la base de cotización'],
@@ -394,7 +392,7 @@ QUESTIONS.push(
 );
 for(const id of ['agua','mercosur','genetica']) QUESTIONS.find(q=>q.id===id).s='rural';
 
-/* Partidos de ámbito autonómico: [posición, fuente] por pregunta. */
+// Partidos que solo se presentan en una comunidad: [posición, fuente] por pregunta.
 const REGPOS={
  erc:{smi:[1,'Programa 2023: SMI catalán propio'],jornada:[1,'Votó sí a las 37,5 h (sep. 2025)'],despido:[0,'Programa 2023: 45 días y salarios de tramitación'],gasto:[1,'Programa 2023'],irpf:[1,'Programa 2023: más tramos altos y gravar el capital'],patrimonio:[1,'Programa 2023'],banca:[1,'Programa 2023: gravámenes permanentes'],
   alquiler:[1,'Pidió subida del 0 % y prohibir desahucios (mar. 2026)'],okupa:[1,'Pide prohibir los desahucios (2026)'],turisticos:[-0.5,'Decreto catalán de 2023 de su Govern: fin de licencias en municipios tensionados'],pensiones:[0,'Programa 2023: 65 años y mínimas ligadas al SMI'],prioridad:[0,'Programa 2023: voto a los residentes empadronados'],redistribucion:[1,'Programa 2023'],
@@ -428,7 +426,7 @@ const REGPOS={
 };
 for(const q of QUESTIONS){
   for(const [pid,pos] of Object.entries(REGPOS)) if(pos[q.id]&&!q.m[pid]) q.m[pid]=pos[q.id];
-  // ponytail: UPC y Compromís-FV heredan la posición de Frente Amplio (Sumar, IU y Podemos van en ellas) donde no tienen una propia
+  // UPC y Compromís-FV no tienen programa propio; donde callan, usamos el del Frente Amplio, que va dentro.
   for(const p of PARTIES) if(p.base&&!q.m[p.id]&&q.m[p.base]) q.m[p.id]=[q.m[p.base][0],'Como Frente Amplio: '+q.m[p.base][1]];
 }
 const SEC_ORDER=Object.keys(SECTIONS);

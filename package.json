@@ -2,8 +2,11 @@
   "name": "papeleta-29n",
   "private": true,
   "type": "module",
-  "description": "Sin dependencias a propósito: no hay nada que instalar. Solo se usa Node para las pruebas.",
+  "description": "Test de afinidad para las elecciones generales del 29 de noviembre de 2026. Web estática, sin dependencias.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "test": "node tests/domain.test.js && node tests/glossary.test.js"
+    "test": "node --test"
   }
 }

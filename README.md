@@ -7,35 +7,44 @@ Es una web estática: HTML, CSS y JavaScript de navegador. No hay servidor, base
 ## Arquitectura
 
 ```
-public/                    ← lo que se publica, tal cual
-  index.html               marcado, sin scripts ni estilos en línea
+public/                       lo que se publica, tal cual
+  index.html                  marcado, sin scripts ni estilos en línea
   styles.css
-  _headers                 cabeceras de seguridad (Cloudflare Pages y Netlify)
+  _headers                    cabeceras de seguridad (Cloudflare Pages y Netlify)
   src/
-    domain/                datos y reglas, sin DOM ni navegador
-      sections.js          bloques temáticos y etiquetas de viabilidad
-      electoral.js         circunscripciones, candidaturas, dónde se presenta cada partido, veda de encuestas
-      questions.js         preguntas, opciones y posición de cada partido con su fuente
-      scoring.js           cálculo de afinidad
-      reference.js         fichas de partido, votaciones y fuentes
-      glossary.js          glosario
+    domain/                   reglas y datos; no sabe que existe un navegador
+      data/                   catálogos con su fuente: preguntas, partidos, circunscripciones, fichas, votaciones, glosario
+      electoral.js            quién se presenta dónde, escaños, viabilidad y veda de encuestas
+      scoring.js              cálculo de afinidad
     application/
-      quiz.js              casos de uso del cuestionario y el puerto de almacenamiento; valida lo guardado
+      quiz.js                 la sesión del cuestionario: casos de uso, validación de lo guardado y puerto de almacenamiento
     infrastructure/
-      storage.js           adaptador de ese puerto sobre localStorage
+      local-storage.js        el almacenamiento real, sobre localStorage
     interfaces/
-      html.js              escapado de texto y marcado del glosario
-      ui.js                pintado del DOM y eventos
-    main.js                arranque: conecta almacenamiento, casos de uso e interfaz
-tests/                     pruebas con Node, sin dependencias
+      app.js                  pestañas, repintado y reparto de eventos
+      views/                  una vista por pestaña; cada una devuelve HTML y declara sus acciones
+      bubble.js               la burbuja que explica los términos del glosario
+      html.js                 escapado y marcado de términos
+    main.js                   arranque: une almacenamiento, sesión e interfaz
+tests/                        node:test, sin dependencias
 ```
 
-Las dependencias apuntan hacia dentro: `domain` no importa nada; `application` solo importa `domain`; `interfaces` usa `application` y `domain`, nunca `infrastructure`. Solo `main.js` conoce las tres capas.
+| Capa | Qué hay | Qué no puede hacer |
+|---|---|---|
+| `domain` | Datos electorales y reglas puras (quién se presenta, cómo se puntúa) | Importar nada de fuera de `domain` |
+| `application` | La sesión del votante: responder, pesar, elegir circunscripción, pedir resultados. Define el puerto `{load, save}` | Tocar el DOM o `localStorage` |
+| `infrastructure` | El adaptador de ese puerto | Contener reglas |
+| `interfaces` | Pintar y traducir clics en llamadas a la sesión | Decidir nada de negocio ni hablar con el almacenamiento |
+
+Las dependencias apuntan hacia dentro y solo `main.js` conoce las cuatro capas. La sesión se crea con `createQuiz(storage)`, así que las pruebas usan un almacenamiento en memoria y no necesitan navegador.
+
+El estado está separado en dos: lo que el votante decide (respuestas, planes, circunscripción, paso) vive en la sesión y se guarda; lo que solo afecta a la pantalla (pestaña, ficha desplegada, búsqueda del glosario) vive en `interfaces/app.js` y se pierde al recargar.
 
 Simplificaciones deliberadas:
 
-- Los datos son módulos JavaScript, no JSON. Así no hace falta ningún `fetch` y la CSP puede prohibir cualquier conexión (`connect-src 'none'`).
-- La interfaz pinta con `innerHTML`, pero todo texto pasa antes por `esc()` o `ann()` (`interfaces/html.js`). Las pruebas comprueban que el HTML se escapa.
+- Los datos son módulos JavaScript, no JSON. Así no hace falta ningún `fetch` y la CSP puede prohibir cualquier conexión (`connect-src 'none'`). Las claves son cortas (`v`, `m`, `o`…) porque son cientos de entradas; cada archivo de `data/` explica las suyas arriba.
+- Las vistas generan HTML como texto, sin framework. Todo texto pasa antes por `esc()` o `annotate()` (`interfaces/html.js`) y las pruebas comprueban que se escapa.
+- Los eventos se escuchan una sola vez en el contenedor (`data-action`), no en cada botón tras cada repintado.
 - La veda de encuestas depende del reloj del visitante. Basta porque solo oculta datos que ya son públicos; no es un control de acceso.
 
 ## Seguridad
@@ -57,7 +66,7 @@ Lo que sí se protege:
 - **Entrada no confiable**: lo guardado en `localStorage` se valida contra los datos antes de usarlo (`sanitize` en `application/quiz.js`).
 - **HSTS, nosniff, Referrer-Policy y Permissions-Policy** en `_headers`.
 
-El riesgo que queda es la cuenta del hosting y, si lo hay, el dominio. Activa la verificación en dos pasos con llave de acceso (passkey) o app, nunca SMS. Si usas GitHub, no añadas GitHub Actions de terceros: la de Trivy fue una de las comprometidas en 2026.
+El riesgo que queda es la cuenta del hosting y, si lo hay, el dominio. Activa la verificación en dos pasos con llave de acceso (passkey) o app, nunca SMS. Si usas GitHub, no añadas GitHub Actions de terceros: la de Trivy fue una de las comprometidas en 2026. La única que hay aquí (`.github/workflows/test.yml`) usa solo acciones oficiales de GitHub para pasar las pruebas.
 
 ## Ley electoral
 
@@ -66,7 +75,7 @@ La LOREG (art. 69.7) prohíbe difundir sondeos los cinco días anteriores a la v
 ## Probar en local
 
 ```
-npm test                                  # o: node tests/domain.test.js && node tests/glossary.test.js
+npm test                                  # o directamente: node --test
 python -m http.server 8000 -d public      # y abre http://127.0.0.1:8000
 ```
 
@@ -85,5 +94,5 @@ No funciona abriendo `index.html` con doble clic: los módulos ES necesitan serv
 
 ## Mantenimiento
 
-- Los partidos sin representación necesitan avales y las candidaturas se proclaman el 2 de noviembre (BOE del 3): revisa entonces quién se presenta en cada provincia (`domain/electoral.js`).
-- Cuando salgan los programas, actualiza posiciones y fuentes en `domain/questions.js`. Las pruebas avisan si una posición no existe o un partido deja de ganar con sus propias respuestas.
+- Los partidos sin representación necesitan avales y las candidaturas se proclaman el 2 de noviembre (BOE del 3): revisa entonces quién se presenta en cada provincia (`domain/data/parties.js`).
+- Cuando salgan los programas, actualiza posiciones y fuentes en `domain/data/questions.js`. Las pruebas avisan si una posición no existe o un partido deja de ganar con sus propias respuestas.

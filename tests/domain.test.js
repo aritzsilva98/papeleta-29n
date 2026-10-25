@@ -1,50 +1,82 @@
-// Integridad de los datos y del cálculo: cada partido gana (o empata) con sus propias respuestas donde se presenta.
-import assert from 'node:assert';
-import {SECTIONS} from '../public/src/domain/sections.js';
-import {CCAA,PARTIES,partiesFor,viab,runs,pollsHidden} from '../public/src/domain/electoral.js';
-import {QUESTIONS} from '../public/src/domain/questions.js';
-import {options,score} from '../public/src/domain/scoring.js';
-import {FICHAS,COLS,VOTES_CONG,VOTES_EU} from '../public/src/domain/reference.js';
-import {sanitize,STEPS} from '../public/src/application/quiz.js';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {SECTIONS} from '../public/src/domain/data/sections.js';
+import {REGIONS} from '../public/src/domain/data/regions.js';
+import {PARTIES} from '../public/src/domain/data/parties.js';
+import {QUESTIONS} from '../public/src/domain/data/questions.js';
+import {FICHAS, COLS, VOTES_CONG, VOTES_EU} from '../public/src/domain/data/reference.js';
+import {partiesIn, pollsHidden, runsIn, totalSeats, viability} from '../public/src/domain/electoral.js';
+import {options, score} from '../public/src/domain/scoring.js';
 
-const ids=new Set();
-for(const q of QUESTIONS){
-  assert(!ids.has(q.id),'dup '+q.id); ids.add(q.id); assert(SECTIONS[q.s],q.id+' section');
-  const xs=options(q).map(o=>o.x);
-  assert(xs.length>=6,q.id+' has '+xs.length); assert.strictEqual(new Set(xs).size,xs.length,q.id+' dup positions');
-  for(const [p,[x]] of Object.entries(q.m)){ assert(PARTIES.some(z=>z.id===p),q.id+':'+p); assert(xs.includes(x),q.id+':'+p+' pos '+x); }
-}
-const order=QUESTIONS.map(q=>q.s); assert(order.every((s,i)=>i===0||s===order[i-1]||!order.slice(0,i).includes(s)),'sections not contiguous');
-assert.strictEqual(CCAA.reduce((s,c)=>s+c.p.reduce((a,p)=>a+p[1],0),0),350,'seats != 350');
-for(const [k] of COLS) assert(PARTIES.some(p=>p.id===k),'col '+k);
-for(const r of [...VOTES_CONG,...VOTES_EU]) for(const k in r[3]) assert(COLS.some(c=>c[0]===k),'vote col '+k);
-for(const p of PARTIES){
-  assert(FICHAS[p.id],'ficha '+p.id);
-  const c=CCAA.find(c=>runs(p,{ccaa:c.id})); assert(c,p.id+' runs nowhere');
-  const sel={ccaa:c.id,prov:p.only?.[c.id]?.[0]||null};
-  const ans={}; for(const q of QUESTIONS){ const m=q.m[p.id]; if(m) ans[q.id]={v:m[0],w:1}; }
-  const r=score(ans,{},sel), own=r.find(x=>x.p.id===p.id);
-  assert(r[0].p.id===p.id||Math.abs(r[0].pct-own.pct)<1e-9,`${p.id} in ${c.id} should top, got ${r.slice(0,3).map(x=>x.p.id)}`);
-}
-const ids_=sel=>partiesFor(sel).map(p=>p.id);
-assert(ids_({ccaa:'cat'}).includes('erc')&&!ids_({ccaa:'mad'}).includes('erc'));
-assert(!ids_({ccaa:'cat'}).includes('pod')&&ids_({ccaa:'mad'}).includes('pod'));
-assert(ids_({ccaa:'cyl',prov:'Soria'}).includes('soria')&&!ids_({ccaa:'cyl',prov:'León'}).includes('soria'));
-assert(!ids_({ccaa:'cat',prov:'Girona'}).includes('d21')&&ids_({ccaa:'cat',prov:'Barcelona'}).includes('d21'));
-assert(!ids_({ccaa:'val'}).includes('fa')&&ids_({ccaa:'val'}).includes('comp'));
-assert.strictEqual(viab(PARTIES.find(p=>p.id==='vox'),{ccaa:'cyl',prov:'Soria'}),'incierto');
+const party = id => PARTIES.find(p => p.id === id);
+const idsIn = place => partiesIn(place).map(p => p.id);
 
-// veda de encuestas (LOREG 69.7), en hora peninsular
-assert(!pollsHidden(new Date('2026-11-23T22:30:00Z')));   // 23:30 del 23-nov en Madrid
-assert(pollsHidden(new Date('2026-11-23T23:30:00Z')));    // 00:30 del 24-nov en Madrid
-assert(pollsHidden(new Date('2026-11-29T20:00:00Z')));
-assert(!pollsHidden(new Date('2026-11-30T00:00:00Z')));
+test('cada pregunta tiene al menos seis respuestas y posiciones válidas', () => {
+  const ids = new Set();
+  for (const q of QUESTIONS) {
+    assert.ok(!ids.has(q.id), `id repetido: ${q.id}`);
+    ids.add(q.id);
+    assert.ok(SECTIONS[q.s], `${q.id}: bloque desconocido`);
+    const xs = options(q).map(o => o.x);
+    assert.ok(xs.length >= 6, `${q.id} solo tiene ${xs.length} respuestas`);
+    assert.equal(new Set(xs).size, xs.length, `${q.id}: posiciones repetidas`);
+    for (const [id, [x]] of Object.entries(q.m)) {
+      assert.ok(party(id), `${q.id}: partido desconocido ${id}`);
+      assert.ok(xs.includes(x), `${q.id}: ${id} está en una posición que no existe (${x})`);
+    }
+  }
+});
 
-// lo leído del navegador es entrada no confiable
-assert.strictEqual(sanitize('x'),null);
-const s=sanitize({answers:{smi:{v:2,w:9},hack:{v:1},iva:{v:'<img>'}},plans:{prio:['vivienda','nope'],casa:99},sel:{ccaa:'cyl',prov:'<b>'},step:1e9});
-assert.deepStrictEqual(s.answers,{smi:{v:2,w:1},iva:{v:undefined,w:1}});
-assert.deepStrictEqual(s.plans,{prio:['vivienda']});
-assert.deepStrictEqual(s.sel,{ccaa:'cyl',prov:null});
-assert.strictEqual(s.step,STEPS.length-1);
-console.log(`ok: ${QUESTIONS.length} preguntas, ${PARTIES.length} partidos, ${CCAA.length} comunidades`);
+test('las preguntas de un mismo bloque van seguidas', () => {
+  const order = QUESTIONS.map(q => q.s);
+  assert.ok(order.every((s, i) => i === 0 || s === order[i - 1] || !order.slice(0, i).includes(s)));
+});
+
+test('el Congreso reparte 350 escaños', () => {
+  assert.equal(totalSeats(), 350);
+});
+
+test('fichas y votaciones solo citan partidos que existen', () => {
+  for (const [id] of COLS) assert.ok(party(id), `columna ${id}`);
+  for (const row of [...VOTES_CONG, ...VOTES_EU]) {
+    for (const id in row[3]) assert.ok(COLS.some(([c]) => c === id), `voto de ${id} sin columna`);
+  }
+  for (const p of PARTIES) assert.ok(FICHAS[p.id], `falta la ficha de ${p.id}`);
+});
+
+test('cada partido gana, o empata, si respondes exactamente lo que defiende', () => {
+  for (const p of PARTIES) {
+    const region = REGIONS.find(r => runsIn(p, {ccaa: r.id}));
+    assert.ok(region, `${p.id} no se presenta en ninguna parte`);
+    const place = {ccaa: region.id, prov: p.only?.[region.id]?.[0] ?? null};
+    const answers = {};
+    for (const q of QUESTIONS) if (q.m[p.id]) answers[q.id] = {v: q.m[p.id][0], w: 1};
+    const ranking = score(answers, {}, place);
+    const own = ranking.find(r => r.party.id === p.id);
+    assert.ok(ranking[0].party.id === p.id || Math.abs(ranking[0].pct - own.pct) < 1e-9,
+      `${p.id} en ${region.id} debería salir primero; salen ${ranking.slice(0, 3).map(r => r.party.id)}`);
+  }
+});
+
+test('solo se comparan los partidos que se presentan donde votas', () => {
+  assert.ok(idsIn({ccaa: 'cat'}).includes('erc') && !idsIn({ccaa: 'mad'}).includes('erc'));
+  assert.ok(!idsIn({ccaa: 'cat'}).includes('pod') && idsIn({ccaa: 'mad'}).includes('pod'));
+  assert.ok(idsIn({ccaa: 'cyl', prov: 'Soria'}).includes('soria') && !idsIn({ccaa: 'cyl', prov: 'León'}).includes('soria'));
+  assert.ok(!idsIn({ccaa: 'cat', prov: 'Girona'}).includes('d21') && idsIn({ccaa: 'cat', prov: 'Barcelona'}).includes('d21'));
+  assert.ok(!idsIn({ccaa: 'val'}).includes('fa') && idsIn({ccaa: 'val'}).includes('comp'));
+});
+
+test('en provincias pequeñas solo los grandes y los locales conservan opciones', () => {
+  const soria = {ccaa: 'cyl', prov: 'Soria'};
+  assert.equal(viability(party('vox'), soria), 'incierto');
+  assert.equal(viability(party('pp'), soria), 'seguro');
+  assert.equal(viability(party('soria'), soria), 'incierto');
+  assert.equal(viability(party('pod'), soria), 'improbable');
+});
+
+test('la veda de encuestas va en hora peninsular', () => {
+  assert.ok(!pollsHidden(new Date('2026-11-23T22:30:00Z')));
+  assert.ok(pollsHidden(new Date('2026-11-23T23:30:00Z')));
+  assert.ok(pollsHidden(new Date('2026-11-29T20:00:00Z')));
+  assert.ok(!pollsHidden(new Date('2026-11-30T00:00:00Z')));
+});

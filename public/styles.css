@@ -1,4 +1,3 @@
-/* Papeleta oficial (cabecera en mono, tinta azul de urna) + herramienta en dos columnas que se apila en móvil. Fuentes del sistema: ninguna petición a terceros. */
 :root{
   --paper:#F5F6F9; --surface:#FFFFFF; --ink:#151922; --muted:#5A6172; --line:#DADEE7;
   --accent:#2C43C4; --accent-soft:#E5E8FA; --sepia:#9A6B2C;
@@ -33,7 +32,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .muted{color:var(--muted)}
 .small{font-size:13px}
 
-/* cabecera tipo papeleta */
+
 .ballot{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--ink);padding:18px 20px;display:grid;gap:10px}
 .ballot .strip{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted)}
 .ballot .strip b{color:var(--ink);font-weight:500}
@@ -43,7 +42,7 @@ nav.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line)
 nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px;font-weight:500;color:var(--muted)}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
-/* cuestionario */
+
 .quiz{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:start}
 .side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px;font-size:13px}
 .side button{display:flex;justify-content:space-between;gap:8px;text-align:left;background:none;border:0;padding:6px 8px;border-radius:6px;color:var(--muted)}
@@ -71,7 +70,7 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 .btn:disabled{opacity:.4;cursor:default}
 .hint{font-size:13px;color:var(--muted)}
 
-/* resultados */
+
 .res{display:grid;gap:10px}
 .pr{background:var(--surface);border:1px solid var(--line);border-radius:10px}
 .pr>button{width:100%;background:none;border:0;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;text-align:left}
@@ -103,7 +102,7 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 #gq{font:inherit;width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
 .notice{border-left:3px solid var(--sepia);padding:10px 14px;background:var(--surface);font-size:14px;max-width:80ch}
 
-/* selector de circunscripción */
+
 .picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
 .picker button{display:flex;justify-content:space-between;align-items:baseline;gap:8px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .picker button:hover{border-color:var(--accent)}
@@ -113,7 +112,7 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 .where b{font-weight:600;color:var(--ink)}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;font-size:13px;justify-self:start}
 
-/* partidos */
+
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
 details.party{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 details.party summary{cursor:pointer;list-style:none;display:grid;gap:6px}
@@ -123,7 +122,7 @@ details.party[open] summary{margin-bottom:10px}
 .kv b{display:block;font-size:12px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
 .kv ul{margin:2px 0 0;padding-left:18px}
 
-/* votaciones */
+
 .tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
 table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
