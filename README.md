@@ -81,16 +81,16 @@ python -m http.server 8000 -d public      # y abre http://127.0.0.1:8000
 
 No funciona abriendo `index.html` con doble clic: los módulos ES necesitan servirse por HTTP.
 
-## Publicar gratis
+## Publicación
 
-**Recomendado: Cloudflare Pages, subida directa.** Respeta `_headers`, el ancho de banda no tiene límite en el plan gratuito y no hace falta Git.
+La web está en **https://papeleta-29n.pages.dev**, en el plan gratuito de Cloudflare Pages.
 
-1. Crea una cuenta en Cloudflare y activa la verificación en dos pasos.
-2. Workers y Pages → Crear → Pages → subir recursos (Direct Upload).
-3. Arrastra la carpeta `public/`. Te da una dirección `*.pages.dev`.
-4. Para actualizar, sube la carpeta de nuevo.
+- Cloudflare está conectado a este repositorio, con acceso solo a `papeleta-29n`. Cada push a `main` se publica solo en un minuto.
+- No hay paso de build: Cloudflare sirve tal cual la carpeta `public/`, y `_headers` aplica las cabeceras de seguridad.
+- Cada rama o pull request recibe su propia dirección de vista previa, así que puedes probar cambios sin tocar la web publicada.
+- El plan gratuito no tiene límite de ancho de banda ni pide tarjeta. No actives nada de pago en el panel: no hace falta.
 
-**Alternativa: GitHub Pages.** Es más sencillo si ya usas GitHub, pero ignora `_headers`: solo se aplica la CSP de la `<meta>`, sin HSTS propio ni protección contra que otra web incruste la tuya. GitHub Pages solo publica la raíz del repositorio o `/docs`, así que el contenido de `public/` tiene que ir en una de esas dos.
+Si algún día se quiere otro host, basta con servir `public/` como estático. GitHub Pages también vale, pero ignora `_headers`.
 
 ## Mantenimiento
 
