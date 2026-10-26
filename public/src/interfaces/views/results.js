@@ -28,7 +28,7 @@ function breakdown(result, place) {
   const item = row => `
     <div class="li">
       <span class="t"><span class="dot ${agreementLevel(row.closeness)}"></span>${annotate(row.question.t, seen)}</span>
-      <span class="small">Tú: ${annotate(optionText(row.question, row.answer), seen)}</span>
+      <span class="small">Tú: ${annotate(optionText(row.question, row.answer), seen)} <button class="linkbtn" data-action="edit" data-q="${row.question.id}">Cambiar</button></span>
       <span class="small muted">${esc(ballotName(result.party, place))}: ${annotate(optionText(row.question, row.position[0]), seen)} · <i>${annotate(row.position[1], seen)}</i></span>
     </div>`;
   const list = (rows, empty) => rows.map(item).join('') || `<p class="muted small">${empty}</p>`;
@@ -112,7 +112,13 @@ export const actions = {
     ctx.refresh();
   },
   review(ctx) {
-    ctx.quiz.reviewAnswers();
+    ctx.ui.reviewing = true;
+    ctx.go('cuestionario');
+  },
+  edit(ctx, el) {
+    ctx.ui.reviewing = false;
+    ctx.ui.returnTo = 'resultados';
+    ctx.quiz.goTo(ctx.quiz.stepOf(el.dataset.q));
     ctx.go('cuestionario');
   },
   reset(ctx, el) {
@@ -122,7 +128,7 @@ export const actions = {
       return;
     }
     ctx.quiz.reset();
-    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: {}});
+    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: {}, reviewing: false, returnTo: null});
     ctx.go('cuestionario');
   },
 };

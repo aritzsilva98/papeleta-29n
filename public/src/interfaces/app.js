@@ -44,6 +44,9 @@ export function mount(quiz) {
     openParty: null,
     showAll: {},
     glossaryQuery: '',
+    // Repaso abierto y, si se edita una pregunta desde fuera, adónde volver al responder.
+    reviewing: false,
+    returnTo: null,
   };
   const ctx = {quiz, ui, refresh, go};
 
@@ -72,6 +75,7 @@ export function mount(quiz) {
 
   function go(tab) {
     ui.tab = tab;
+    if (tab !== 'cuestionario') ui.returnTo = null;
     try { history.replaceState(null, '', '#' + tab); } catch {}
     refresh();
     scrollTo({top: 0});

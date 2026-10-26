@@ -1,6 +1,6 @@
 # Papeleta 29-N
 
-Test de afinidad para las elecciones generales del 29 de noviembre de 2026. Eliges comunidad (y, si quieres, provincia) y comparas 91 preguntas con los partidos que se presentan allí. Cada posición lleva su fuente.
+Test de afinidad para las elecciones generales del 29 de noviembre de 2026. Eliges comunidad (y, si quieres, provincia) y comparas 86 preguntas (más 5 sobre tus planes) con los partidos que se presentan allí. Cada posición lleva su fuente.
 
 Es una web estática: HTML, CSS y JavaScript de navegador. No hay servidor, base de datos, dependencias ni paso de compilación.
 
@@ -38,7 +38,7 @@ tests/                        node:test, sin dependencias
 
 Las dependencias apuntan hacia dentro y solo `main.js` conoce las cuatro capas. La sesión se crea con `createQuiz(storage)`, así que las pruebas usan un almacenamiento en memoria y no necesitan navegador.
 
-El estado está separado en dos: lo que el votante decide (respuestas, planes, circunscripción, paso) vive en la sesión y se guarda; lo que solo afecta a la pantalla (pestaña, ficha desplegada, búsqueda del glosario) vive en `interfaces/app.js` y se pierde al recargar.
+El estado está separado en dos: lo que el votante decide (respuestas, planes, circunscripción, paso) vive en la sesión y se guarda; lo que solo afecta a la pantalla (pestaña, ficha desplegada, búsqueda del glosario, repaso abierto y adónde volver tras editar una respuesta) vive en `interfaces/app.js` y se pierde al recargar.
 
 Simplificaciones deliberadas:
 

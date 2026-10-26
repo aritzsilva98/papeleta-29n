@@ -73,6 +73,7 @@ export function createQuiz(storage) {
     answeredCount,
     goTo,
     planOf: id => s.plans[id],
+    stepOf: id => STEPS.findIndex(st => st.item.id === id),
 
     progress() {
       const sections = [...new Set(STEPS.map(st => st.section))];
@@ -107,7 +108,6 @@ export function createQuiz(storage) {
       save();
     },
 
-    reviewAnswers: () => goTo(PLANS.length),
 
     reset() {
       s = empty();
