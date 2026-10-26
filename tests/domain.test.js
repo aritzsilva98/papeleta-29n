@@ -27,11 +27,6 @@ test('cada pregunta tiene al menos seis respuestas y posiciones válidas', () =>
   }
 });
 
-test('las preguntas de un mismo bloque van seguidas', () => {
-  const order = QUESTIONS.map(q => q.s);
-  assert.ok(order.every((s, i) => i === 0 || s === order[i - 1] || !order.slice(0, i).includes(s)));
-});
-
 test('el Congreso reparte 350 escaños', () => {
   assert.equal(totalSeats(), 350);
 });

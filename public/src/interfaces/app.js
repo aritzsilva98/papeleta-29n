@@ -20,6 +20,12 @@ const TABS = [
 ];
 
 const SHARED_ACTIONS = {
+  edit(ctx, el) {
+    ctx.ui.returnTo = ctx.ui.tab === 'resultados' ? 'resultados' : 'repaso';
+    ctx.ui.reviewing = false;
+    ctx.quiz.goTo(ctx.quiz.stepOf(el.dataset.q));
+    ctx.go('cuestionario');
+  },
   'change-place'(ctx) {
     ctx.ui.picking = true;
     ctx.go('cuestionario');
@@ -32,22 +38,23 @@ const SHARED_ACTIONS = {
 
 const tabById = id => TABS.find(t => t.id === id) ?? TABS[0];
 
+const initialUi = () => ({
+  picking: false,
+  pendingRegion: null,
+  openParty: null,
+  showAll: {},
+  glossaryQuery: '',
+  reviewing: false,
+  returnTo: null,
+});
+
 export function mount(quiz) {
   const root = document.querySelector('#view');
   const nav = document.querySelector('#tabs');
   const header = document.querySelector('#circ');
   const bubble = createGlossaryBubble();
-  const ui = {
-    tab: tabById(location.hash.slice(1)).id,
-    picking: false,
-    pendingRegion: null,
-    openParty: null,
-    showAll: {},
-    glossaryQuery: '',
-    reviewing: false,
-    returnTo: null,
-  };
-  const ctx = {quiz, ui, refresh, go};
+  const ui = {tab: tabById(location.hash.slice(1)).id, ...initialUi()};
+  const ctx = {quiz, ui, refresh, go, resetUi: () => Object.assign(ui, initialUi())};
 
   function paintTabs() {
     nav.innerHTML = TABS.map(({id, label}) => {

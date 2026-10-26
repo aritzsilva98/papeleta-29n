@@ -37,6 +37,6 @@ export const inputs = {
   // Repaint only the list so the search box keeps focus while typing.
   search(ctx, el) {
     ctx.ui.glossaryQuery = el.value;
-    el.closest('.res').querySelector('#gl').innerHTML = list(el.value);
+    document.getElementById('gl').innerHTML = list(el.value);
   },
 };

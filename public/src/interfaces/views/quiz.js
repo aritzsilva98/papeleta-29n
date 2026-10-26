@@ -60,14 +60,14 @@ function answerSummary(quiz, step) {
   return isAnswered(answer) ? optionText(item, answer.v) : null;
 }
 
-function reviewRow(quiz, step, index) {
+function reviewRow(quiz, step) {
   const summary = answerSummary(quiz, step);
   const answer = quiz.answerOf(step.item.id);
   const weigh = step.kind === 'question' && isAnswered(answer)
-    ? `<div class="seg" role="group" aria-label="Importancia">${weightButtons(answer, step.item.id)}</div>` : '';
+    ? `<div class="seg" role="group" aria-label="Importancia: ${esc(step.item.t)}">${weightButtons(answer, step.item.id)}</div>` : '';
   return `
     <div class="rv" id="rv-${step.item.id}">
-      <button class="rv-q" data-action="edit" data-step="${index}">
+      <button class="rv-q" data-action="edit" data-q="${step.item.id}">
         <span class="t">${esc(step.item.t)}</span>
         <span class="small ${summary ? 'muted' : 'todo'}">${esc(summary ?? 'Sin responder')}</span>
       </button>
@@ -78,7 +78,7 @@ function reviewRow(quiz, step, index) {
 function review(quiz) {
   const blocks = quiz.progress().map(p => `
     <h3>${SECTIONS[p.section]} <span class="muted small">${p.done}/${p.total}</span></h3>
-    ${STEPS.slice(p.first, p.first + p.total).map((st, i) => reviewRow(quiz, st, p.first + i)).join('')}`).join('');
+    ${STEPS.slice(p.first, p.first + p.total).map(st => reviewRow(quiz, st)).join('')}`).join('');
   return `
     <section class="card review">
       ${whereRow(quiz.place)}
@@ -137,34 +137,39 @@ export function render(ctx) {
 function openReview(ctx, focusId = null) {
   ctx.ui.reviewing = true;
   ctx.refresh();
-  if (focusId) document.getElementById(`rv-${focusId}`)?.scrollIntoView({block: 'center'});
-  else scrollTo({top: 0});
+  const row = focusId && document.querySelector(`#rv-${focusId} .rv-q`);
+  if (!row) return scrollTo({top: 0});
+  row.scrollIntoView({block: 'center'});
+  row.focus({preventScroll: true});
 }
 
 function back(ctx) {
-  const to = ctx.ui.returnTo;
+  const to = ctx.ui.returnTo, id = ctx.quiz.current.item.id;
   ctx.ui.returnTo = null;
-  if (to === 'repaso') openReview(ctx, ctx.quiz.current.item.id);
-  else ctx.go('resultados');
+  if (to === 'repaso') return openReview(ctx, id);
+  ctx.go('resultados');
+  document.querySelector(`[data-q="${id}"]`)?.scrollIntoView({block: 'center'});
+}
+
+function moveTo(ctx, step) {
+  ctx.ui.returnTo = null;
+  ctx.quiz.goTo(step);
+  ctx.refresh();
 }
 
 function next(ctx) {
   if (ctx.quiz.isLast) return ctx.go('resultados');
-  ctx.quiz.goTo(ctx.quiz.step + 1);
-  ctx.refresh();
+  moveTo(ctx, ctx.quiz.step + 1);
 }
 
 const afterAnswer = ctx => ctx.ui.returnTo ? back(ctx) : next(ctx);
 
 export const actions = {
   ...picker.actions,
-  jump(ctx, el) {
-    ctx.quiz.goTo(Number(el.dataset.step));
-    ctx.refresh();
-  },
+  jump: (ctx, el) => moveTo(ctx, Number(el.dataset.step)),
   plan(ctx, el) {
     const plan = ctx.quiz.current.item;
-    ctx.quiz.choosePlan(plan, Number(el.dataset.index));
+    ctx.quiz.choosePlan(plan.id, Number(el.dataset.index));
     if (plan.multi) ctx.refresh();
     else afterAnswer(ctx);
   },
@@ -174,25 +179,20 @@ export const actions = {
     afterAnswer(ctx);
   },
   weigh(ctx, el) {
-    ctx.quiz.weigh(el.dataset.id ?? ctx.quiz.current.item.id, Number(el.dataset.weight));
+    const {id, weight} = el.dataset;
+    ctx.quiz.weigh(id ?? ctx.quiz.current.item.id, Number(weight));
     ctx.refresh();
+    const scope = id ? `[data-id="${id}"]` : ':not([data-id])';
+    document.querySelector(`[data-action="weigh"][data-weight="${weight}"]${scope}`)?.focus({preventScroll: true});
   },
-  prev(ctx) {
-    ctx.quiz.goTo(ctx.quiz.step - 1);
-    ctx.refresh();
-  },
+  prev: ctx => moveTo(ctx, ctx.quiz.step - 1),
   next,
   return: back,
   'open-review': ctx => openReview(ctx),
   'close-review'(ctx) {
     ctx.ui.reviewing = false;
+    ctx.ui.returnTo = null;
     ctx.refresh();
-  },
-  edit(ctx, el) {
-    ctx.ui.reviewing = false;
-    ctx.ui.returnTo = 'repaso';
-    ctx.quiz.goTo(Number(el.dataset.step));
-    ctx.go('cuestionario');
   },
   finish(ctx) {
     ctx.ui.reviewing = false;
@@ -201,8 +201,5 @@ export const actions = {
 };
 
 export const inputs = {
-  block(ctx, el) {
-    ctx.quiz.goTo(Number(el.value));
-    ctx.refresh();
-  },
+  block: (ctx, el) => moveTo(ctx, Number(el.value)),
 };

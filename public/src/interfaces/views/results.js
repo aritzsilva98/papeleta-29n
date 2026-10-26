@@ -106,19 +106,16 @@ export function render({quiz, ui}) {
 }
 
 export const actions = {
-  'back-to-quiz': ctx => ctx.go('cuestionario'),
+  'back-to-quiz'(ctx) {
+    ctx.ui.reviewing = false;
+    ctx.go('cuestionario');
+  },
   'toggle-party'(ctx, el) {
     ctx.ui.openParty = ctx.ui.openParty === el.dataset.party ? null : el.dataset.party;
     ctx.refresh();
   },
   review(ctx) {
     ctx.ui.reviewing = true;
-    ctx.go('cuestionario');
-  },
-  edit(ctx, el) {
-    ctx.ui.reviewing = false;
-    ctx.ui.returnTo = 'resultados';
-    ctx.quiz.goTo(ctx.quiz.stepOf(el.dataset.q));
     ctx.go('cuestionario');
   },
   reset(ctx, el) {
@@ -128,7 +125,7 @@ export const actions = {
       return;
     }
     ctx.quiz.reset();
-    Object.assign(ctx.ui, {openParty: null, picking: false, pendingRegion: null, showAll: {}, reviewing: false, returnTo: null});
+    ctx.resetUi();
     ctx.go('cuestionario');
   },
 };

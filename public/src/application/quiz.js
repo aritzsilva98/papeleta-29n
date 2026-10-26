@@ -97,7 +97,8 @@ export function createQuiz(storage) {
       save();
     },
 
-    choosePlan(plan, index) {
+    choosePlan(planId, index) {
+      const plan = PLANS.find(p => p.id === planId);
       if (!plan.multi) s.plans[plan.id] = index;
       else {
         const picked = s.plans[plan.id] ?? [], key = plan.o[index].sec;
@@ -106,7 +107,6 @@ export function createQuiz(storage) {
       }
       save();
     },
-
 
     reset() {
       s = empty();

@@ -151,10 +151,10 @@ const QUESTIONS=[
  {id:'transicion',s:'clima',t:'Transición ecológica',q:'¿A qué ritmo debe ir la transición ecológica?',ctx:'En la Eurocámara, el PP votó contra el objetivo de reducir un 90 % las emisiones en 2040 (nov. 2025 y feb. 2026).',
   o:['Acelerarla: impuestos verdes a jets, yates y lujo, y fin de vuelos con alternativa en tren','Acelerarla con renovables y fiscalidad verde','Descarbonizar a un ritmo social y económicamente sostenible','Neutralidad tecnológica, calendario más flexible y revisar el fin del motor de combustión en 2035','Frenarla: derogar la Ley de Cambio Climático y salir del Acuerdo de París'],
   m:{pod:[0,'Programa 2024'],fa:[0,'Programa 2023'],pacma:[0,'Programa 2023'],psoe:[1,'Votó sí al objetivo 2040'],ie:[2,'Documento 2025'],d21:[2,'Ciudadanos, europeas 2024'],pp:[3,'Programa 2023; votó no al objetivo 2040'],salf:[3,'Votó no al objetivo 2040'],vox:[4,'Programa 2023'],fo:[4,'Programa 2026']}},
- {id:'agua',s:'clima',t:'Agua',q:'¿Cómo afrontar la escasez de agua?',
+ {id:'agua',s:'rural',t:'Agua',q:'¿Cómo afrontar la escasez de agua?',
   o:['Acabar con los trasvases y priorizar caudales ecológicos','Desalación y reutilización, reduciendo trasvases','Gestión por cuencas sin nuevos trasvases','Un Pacto Nacional del Agua que defienda el trasvase Tajo-Segura','Plan Hidrológico Nacional con nuevos trasvases y embalses'],
   m:{pacma:[0,'Programa 2023'],psoe:[1,'Programa 2023'],fa:[1,'Programa 2023'],pod:[1,'Programa 2024'],pp:[3,'Programa 2023'],vox:[4,'Programa 2023'],salf:[4,'Programa Castilla y León 2026'],fo:[4,'Programa 2026'],ie:[4,'Documento 2025']}},
- {id:'mercosur',s:'clima',t:'Comercio agrícola',q:'¿Qué hacer con acuerdos como el de la UE con Mercosur?',ctx:'En enero de 2026 la Eurocámara lo envió al Tribunal de Justicia por 10 votos: Vox a favor; PP y PSOE en contra.',
+ {id:'mercosur',s:'rural',t:'Comercio agrícola',q:'¿Qué hacer con acuerdos como el de la UE con Mercosur?',ctx:'En enero de 2026 la Eurocámara lo envió al Tribunal de Justicia por 10 votos: Vox a favor; PP y PSOE en contra.',
   o:['Rechazarlo: protege mal al campo y rebaja estándares','Renegociarlo a fondo','Apoyarlo con «cláusulas espejo» que exijan los mismos estándares','Impulsarlo con salvaguardas para el sector agrario','Libre comercio pleno, sin trabas'],
   m:{pod:[0,'Programa 2024'],vox:[0,'Votó llevarlo al TJUE'],salf:[0,'Programa Castilla y León 2026'],fo:[0,'Programa 2026'],pacma:[0,'Programa europeas 2024'],fa:[1,'Programa 2023'],ie:[1,'Documento 2025'],pp:[3,'Apoya el acuerdo (2026); votó la salvaguarda agrícola'],psoe:[3,'Impulsor del acuerdo'],d21:[3,'Ciudadanos, europeas 2024']}},
 
@@ -203,7 +203,7 @@ QUESTIONS.push(
   o:['Ampliarlas y endurecerlas: menos coches en las ciudades','Mantenerlas obligatorias en las ciudades de más de 50.000 habitantes','Mantenerlas, con más moratorias y ayudas para cambiar de coche','Que cada ayuntamiento decida si las pone','Derogarlas: castigan a quien no puede cambiar de coche'],
   e:[[0.5,'Peajes urbanos para coches privados y transporte público gratis'],[3.5,'Aplazarlas hasta que haya transporte público suficiente']],
   m:{psoe:[1,'Leyes de Cambio Climático y de Movilidad Sostenible'],fa:[1,'Apoya la ley de Cambio Climático'],pp:[3,'Votó contra derogarlas, pero pactó con Vox no crear la de Valencia'],vox:[4,'Propuesta de derogación (jun. 2026)'],fo:[4,'Programa 2026: poner fin a la «transición ecológica»']}},
- {id:'genetica',s:'clima',t:'Cultivos editados genéticamente',q:'¿Permitir cultivos obtenidos con nuevas técnicas genómicas (edición genética)?',ctx:'En junio de 2026 la Eurocámara aprobó flexibilizarlos; la izquierda y SALF votaron rechazarlo.',
+ {id:'genetica',s:'rural',t:'Cultivos editados genéticamente',q:'¿Permitir cultivos obtenidos con nuevas técnicas genómicas (edición genética)?',ctx:'En junio de 2026 la Eurocámara aprobó flexibilizarlos; la izquierda y SALF votaron rechazarlo.',
   o:['Prohibir transgénicos y cultivos editados','Permitirlos solo con etiquetado obligatorio y sin patentes','Permitir los editados con controles caso a caso','Tratar los editados como cultivos convencionales','Liberalizar también los transgénicos clásicos'],
   e:[[0.5,'Moratoria hasta tener más estudios a largo plazo'],[2.5,'Permitirlos y financiar investigación pública para que no dependan de multinacionales']],
   m:{pod:[1,'Votó rechazar el acuerdo (jun. 2026)'],fa:[1,'Votó rechazar el acuerdo'],salf:[1,'Votó rechazar el acuerdo'],pp:[3,'Votó a favor del acuerdo'],psoe:[3,'Votó a favor del acuerdo'],vox:[3,'Votó a favor del acuerdo']}},
@@ -390,7 +390,6 @@ QUESTIONS.push(
   e:[[3.5,'Dar todavía más peso a las provincias despobladas']],
   m:{pacma:[0,'Circunscripción única (programa)'],pp:[3,'Defiende el marco constitucional']}}
 );
-for(const id of ['agua','mercosur','genetica']) QUESTIONS.find(q=>q.id===id).s='rural';
 
 // Regional parties: [position, source] per question.
 const REGPOS={
@@ -426,7 +425,7 @@ const REGPOS={
 };
 for(const q of QUESTIONS){
   for(const [pid,pos] of Object.entries(REGPOS)) if(pos[q.id]&&!q.m[pid]) q.m[pid]=pos[q.id];
-  for(const p of PARTIES) if(p.base&&!q.m[p.id]&&q.m[p.base]) q.m[p.id]=[q.m[p.base][0],'Como Frente Amplio: '+q.m[p.base][1]];
+  for(const p of PARTIES) if(p.base&&!q.m[p.id]&&q.m[p.base]) q.m[p.id]=[q.m[p.base][0],`Como ${PARTIES.find(b=>b.id===p.base).n}: ${q.m[p.base][1]}`];
 }
 const SEC_ORDER=Object.keys(SECTIONS);
 QUESTIONS.sort((a,b)=>SEC_ORDER.indexOf(a.s)-SEC_ORDER.indexOf(b.s));

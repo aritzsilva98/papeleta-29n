@@ -37,9 +37,9 @@ test('recuerda las respuestas entre visitas', () => {
 test('las prioridades no pasan del máximo y se desmarcan al repetir', () => {
   const quiz = createQuiz(memoryStore());
   const prio = PLANS.find(p => p.multi);
-  for (let i = 0; i <= prio.multi; i++) quiz.choosePlan(prio, i);
+  for (let i = 0; i <= prio.multi; i++) quiz.choosePlan(prio.id, i);
   assert.equal(quiz.planOf(prio.id).length, prio.multi);
-  quiz.choosePlan(prio, 0);
+  quiz.choosePlan(prio.id, 0);
   assert.equal(quiz.planOf(prio.id).length, prio.multi - 1);
 });
 

@@ -43,7 +43,7 @@ export function runsIn(party, place) {
 
 export const partiesIn = place => PARTIES.filter(p => runsIn(p, place));
 
-// Compromís-FV and UPC have no voting record of their own, so where they run we show the Frente Amplio votes.
+// A coalition with a `base` has no voting record of its own; where it runs, show its base party's votes.
 export const representedIn = (party, place) => runsIn(party, place) || partiesIn(place).some(p => p.base === party.id);
 
 export function viability(party, place) {
