@@ -21,3 +21,8 @@ test('marca términos pegados a signos de puntuación', () => {
 test('cada término se marca una sola vez por bloque', () => {
   assert.equal(annotate('IRPF, IRPF e IRPF').match(/data-g="irpf"/g).length, 1);
 });
+
+test('«los plazos» de otros temas no enlaza con el aborto', () => {
+  assert.ok(!annotate('Mantener los plazos y añadir un compromiso con los valores constitucionales').includes('data-g="plazos"'));
+  assert.ok(annotate('Mantener la ley de plazos').includes('data-g="plazos"'));
+});
