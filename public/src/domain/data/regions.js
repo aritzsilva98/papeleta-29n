@@ -1,4 +1,4 @@
-// Circunscripciones del 29-N: cada provincia con sus escaños. Respecto a 2023, Madrid gana uno y Cádiz lo pierde.
+// Seats per province for 29-N. Versus 2023, Madrid gains one and Cádiz loses one.
 export const REGIONS=[
  {id:'and',n:'Andalucía',p:[['Almería',6],['Cádiz',8],['Córdoba',6],['Granada',7],['Huelva',5],['Jaén',5],['Málaga',11],['Sevilla',12]]},
  {id:'ara',n:'Aragón',p:[['Huesca',3],['Teruel',3],['Zaragoza',7]]},

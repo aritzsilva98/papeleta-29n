@@ -20,7 +20,6 @@ function sidebar(quiz, progress) {
     </button>`).join('');
 }
 
-// En móvil la barra lateral no cabe: un desplegable nativo hace el mismo papel.
 function blockSelect(quiz, progress) {
   const opts = progress.map(p =>
     `<option value="${p.first}" ${quiz.current.section === p.section ? 'selected' : ''}>${SECTIONS[p.section]} · ${p.done}/${p.total}</option>`).join('');
@@ -43,7 +42,6 @@ function questionOptions(question, answer, seen) {
 const weightButtons = (answer, id = '') => IMPORTANCE.map(([w, label]) =>
   `<button data-action="weigh" data-weight="${w}" ${id ? `data-id="${id}"` : ''} aria-pressed="${answer.w === w}">${label}</button>`).join('');
 
-// Va encima de las opciones: al tocar una respuesta se pasa a la siguiente, así que debajo nadie la veía a tiempo.
 const importance = answer => `
   <div class="imp">
     <span>¿Cuánto te importa este tema?</span>
@@ -143,7 +141,6 @@ function openReview(ctx, focusId = null) {
   else scrollTo({top: 0});
 }
 
-// Tras editar desde el repaso o desde resultados se vuelve allí; si no, se sigue en orden.
 function back(ctx) {
   const to = ctx.ui.returnTo;
   ctx.ui.returnTo = null;

@@ -19,13 +19,12 @@ for (const x of ALIASES) {
   BY_ALIAS.set(key, [...(BY_ALIAS.get(key) ?? []), x]);
 }
 
-// Sin lookbehind a propósito: Safari no lo entiende hasta iOS 16.4 y la página se quedaría en blanco.
+// No lookbehind on purpose: Safari before iOS 16.4 fails to parse it and the page would render blank.
 const TERM_RE = new RegExp(`(^|[^\\p{L}\\p{N}])(${ALIASES.map(x => escapeRegExp(x.alias)).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
 
 const termButton = (id, label) => `<span class="term" tabindex="0" role="button" data-g="${id}">${label}</span>`;
 
-// Escapa el texto y convierte en botón los términos del glosario. Cada término se marca
-// solo la primera vez que sale en un mismo bloque; si no, la pantalla se llena de subrayados.
+// Each term is marked only on its first appearance per block (`seen`), or the screen fills with underlines.
 export function annotate(text, seen = new Set()) {
   return esc(text).replace(TERM_RE, (whole, before, match) => {
     const hit = BY_ALIAS.get(match.toLowerCase())?.find(x => !x.caseSensitive || x.alias === match);

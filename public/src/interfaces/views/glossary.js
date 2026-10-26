@@ -34,7 +34,7 @@ export function render({ui}) {
 }
 
 export const inputs = {
-  // Solo se repinta la lista para no quitarle el foco al buscador mientras se escribe.
+  // Repaint only the list so the search box keeps focus while typing.
   search(ctx, el) {
     ctx.ui.glossaryQuery = el.value;
     el.closest('.res').querySelector('#gl').innerHTML = list(el.value);

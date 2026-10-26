@@ -1,5 +1,5 @@
-// Cada término: id, k (nombre), c (categoría), a (formas en que aparece en el texto), d (definición), s ([fuente, url]).
-// cs obliga a respetar mayúsculas: «Patrimonio» es el impuesto, «patrimonio» a secas no.
+// Each term: id, k (name), c (category), a (aliases matched in text), d (definition), s ([source, url]).
+// cs makes matching case-sensitive: «Patrimonio» is the tax, plain «patrimonio» is not.
 const BOE=id=>'https://www.boe.es/buscar/act.php?id='+id, WIKI=t=>'https://es.wikipedia.org/wiki/'+t, HTV=id=>'https://howtheyvote.eu/votes/'+id;
 const CE=['Constitución Española (BOE)',BOE('BOE-A-1978-31229')], REG=['Reglamento del Congreso (BOE)',BOE('BOE-A-1982-5196')];
 const GLOSSARY=[

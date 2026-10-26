@@ -15,8 +15,7 @@ export const STEPS = [
 const empty = () => ({step: 0, answers: {}, plans: {}, place: null});
 const clampStep = step => Math.max(0, Math.min(step, STEPS.length - 1));
 
-// Lo que viene del almacenamiento lo puede haber tocado cualquiera, así que solo
-// aceptamos lo que encaja con las preguntas y circunscripciones que existen.
+// Stored data is untrusted: keep only what matches existing questions and constituencies.
 export function sanitize(raw) {
   if (!raw || typeof raw !== 'object') return null;
 

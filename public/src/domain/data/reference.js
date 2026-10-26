@@ -1,4 +1,4 @@
-// Ficha de cada partido: res (qué es), prog (programa), eco, soc y coh (lo que dice frente a lo que vota).
+// Party sheet: res (summary), prog (programme), eco, soc and coh (what it says vs. how it votes).
 const FICHAS={
  pp:{res:'Centro-derecha liberal-conservador. Grupo europeo: PPE. En Navarra va en coalición con UPN (UPN-PP).',prog:'«Contrato con España» (19-oct-2026) y decálogo económico (sep. 2026): IRPF deflactado y mínimo por hijo duplicado, IVA 0 % en alimentos básicos y 10 % en luz y gas, autónomos sin IVA por debajo de 85.000 €, un millón de viviendas en cuatro años con avales del 95-100 % e IVA del 4 % para jóvenes, desalojo de okupas en 48 h, derogar las zonas tensionadas, prohibir por ley las regularizaciones colectivas, visado por puntos, B2 de español para la nacionalidad, pensiones con el IPC por ley, jueces que eligen el CGPJ, ningún indulto por corrupción, derogar la amnistía y la Ley de Memoria, Ejército en la frontera de Ceuta y Melilla si Marruecos no frena la presión, fin del calendario de cierre nuclear.',
   eco:'Rebajas fiscales sin cuantificar («primero, auditar las cuentas»), 300.000 M€ en infraestructuras con colaboración público-privada, tres normas derogadas por cada nueva, mutuas con capacidad de dar el alta en algunas bajas.',soc:'Mantiene la ley de plazos del aborto con permiso paterno a menores; propone derogar la ley trans y separar por sexo el deporte femenino; prisión permanente para la violencia de género reincidente; escuela gratis de 0 a 3 años y fuera pantallas en clase hasta Secundaria; burka prohibido.',
@@ -87,7 +87,7 @@ const NOTAS={
 };
 
 const COLS=[['pp','PP'],['psoe','PSOE'],['vox','Vox'],['fa','Sumar / FA'],['pod','Podemos'],['salf','SALF'],['erc','ERC'],['junts','Junts'],['bildu','Bildu'],['pnv','PNV'],['bng','BNG'],['cc','CC'],['comp','Compromís']];
-// [fecha, votación, resultado, voto de cada partido, notas]. S sí, N no, A abstención, X no votó.
+// [date, vote, outcome, vote per party, notes]. S yes, N no, A abstained, X did not vote.
 const VOTES_CONG=[
  ['21-sep-2023','Reforma del Reglamento: catalán, euskera y gallego en el Congreso','180-170',{pp:'N',psoe:'S',vox:'N',fa:'S',pod:'S',erc:'S',junts:'S',bildu:'S',pnv:'S',bng:'S',cc:'S'},'No: UPN. Una diputada del PP (Ourense) votó sí.'],
  ['16-nov-2023','Investidura de Pedro Sánchez','179-171',{pp:'N',psoe:'S',vox:'N',fa:'S',pod:'S',erc:'S',junts:'S',bildu:'S',pnv:'S',bng:'S',cc:'S'},'Podemos aún estaba en el grupo de Sumar.'],

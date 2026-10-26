@@ -1,7 +1,6 @@
 const KEY = 'papeleta29n';
 
-// En modo privado o con el almacenamiento bloqueado localStorage lanza excepciones.
-// Entonces la web sigue funcionando, solo que sin recordar nada.
+// localStorage throws in private mode or when storage is blocked; the site then works without memory.
 export const localStore = {
   load() {
     try {

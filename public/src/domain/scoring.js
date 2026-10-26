@@ -3,8 +3,8 @@ import {PLANS, QUESTIONS} from './data/questions.js';
 import {partiesIn} from './electoral.js';
 
 const MAX_SECTION_WEIGHT = 3;
-// Cada partido arranca con tres preguntas imaginarias al 50 %. Así uno con dos o tres
-// posiciones documentadas no se cuela arriba solo porque coincidan por casualidad.
+// Every party starts with three imaginary 50 % answers, so one with only two or three
+// documented positions cannot top the ranking by chance.
 const PRIOR = 3;
 const MATCH = 0.75;
 const CLASH = 0.5;

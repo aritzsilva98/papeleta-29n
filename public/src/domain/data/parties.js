@@ -1,10 +1,10 @@
-// Cómo leer cada partido:
-//   v     viabilidad por comunidad; '_' vale para el resto. Si la comunidad no está y no hay '_', no se presenta allí.
-//   vp    viabilidad por provincia, cuando cambia dentro de la comunidad
-//   x     comunidades donde no se presenta aunque haya '_'
-//   only  provincias concretas en las que se presenta
-//   al    nombre en la papeleta de cada comunidad; hd, cabeza de lista
-//   base  partido del que hereda posiciones cuando no tiene una propia
+// Party keys:
+//   v     viability per region; '_' covers the rest. No entry and no '_' means it does not run there.
+//   vp    viability per province, when it differs within the region
+//   x     regions where it does not run despite '_'
+//   only  the specific provinces where it runs
+//   al    ballot name per region; hd, lead candidate
+//   base  party whose positions it inherits when it has none of its own
 export const PARTIES=[
  {id:'pp',n:'PP',full:'Partido Popular',head:'Alberto Núñez Feijóo',v:{_:'seguro'},al:{nav:'UPN-PP'},hd:{cat:'Xavier García Albiol (Barcelona)',nav:'Lista de UPN con el PP; Sergio Sayas (PP) de número dos'},poll:'Media de 15 encuestas (24-oct): 31,4 % (1.º); proyección media: 137 escaños'},
  {id:'psoe',n:'PSOE',full:'Partido Socialista Obrero Español',head:'Pedro Sánchez',v:{_:'seguro',ceu:'incierto',mel:'improbable'},al:{cat:'PSC-PSOE'},hd:{cat:'Jordi Hereu (Barcelona)'},poll:'Media: 26,9 % (el CIS lo sitúa 1.º); proyección: 106 escaños'},

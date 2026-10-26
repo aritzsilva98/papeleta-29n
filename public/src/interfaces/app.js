@@ -44,7 +44,6 @@ export function mount(quiz) {
     openParty: null,
     showAll: {},
     glossaryQuery: '',
-    // Repaso abierto y, si se edita una pregunta desde fuera, adónde volver al responder.
     reviewing: false,
     returnTo: null,
   };
@@ -69,7 +68,7 @@ export function mount(quiz) {
     paintTabs();
     paintHeader();
     root.innerHTML = tabById(ui.tab).view.render(ctx);
-    // La CSP no deja usar style="" en el HTML, así que el ancho de las barras se pone desde aquí.
+    // The CSP forbids inline style="", so bar widths are set here.
     root.querySelectorAll('[data-bar]').forEach(el => { el.style.width = el.dataset.bar + '%'; });
   }
 

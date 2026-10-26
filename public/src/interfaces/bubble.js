@@ -40,8 +40,7 @@ export function createGlossaryBubble() {
     bubble.querySelector('.bx').onclick = hide;
   }
 
-  // En fase de captura: un término dentro de un botón (una respuesta, un partido)
-  // tiene que abrir su explicación sin que el botón reciba el clic.
+  // Capture phase: a term inside a button (an answer, a party) must open its bubble without clicking the button.
   document.addEventListener('click', e => {
     const term = e.target.closest('.term');
     if (term) {

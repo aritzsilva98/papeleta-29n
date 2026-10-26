@@ -1,22 +1,20 @@
 import {REGIONS} from './data/regions.js';
 import {PARTIES} from './data/parties.js';
 
-// Un lugar de voto es {ccaa, prov}; prov puede ser null si el votante no la indica.
+// A place is {ccaa, prov}; prov is null when the voter does not give one.
 
 const SEAT_CHANCE = new Set(['seguro', 'probable', 'filo']);
 const SMALL_CONSTITUENCY = 3;
 const SAFE_IN_SMALL = new Set(['pp', 'psoe']);
 const SMALL_OVERRIDE = {vox: 'incierto'};
 
-// LOREG art. 69.7: no se pueden difundir sondeos los cinco días anteriores a la votación ni ese mismo día.
+// LOREG art. 69.7: no polls may be published in the five days before the vote or on the day itself.
 const POLL_BLACKOUT = ['2026-11-24', '2026-11-29'];
 
 export const regionById = id => REGIONS.find(r => r.id === id);
 
 export const hasProvinces = region => region.p.length > 1;
 
-// En las comunidades de una sola provincia la provincia se rellena sola; en el resto
-// solo se acepta si existe, y si no se queda en null («toda la comunidad»).
 export function makePlace(ccaa, prov = null) {
   const region = regionById(ccaa);
   if (!region) return null;
@@ -45,15 +43,13 @@ export function runsIn(party, place) {
 
 export const partiesIn = place => PARTIES.filter(p => runsIn(p, place));
 
-// Compromís-FV y UPC son coaliciones nuevas sin votaciones propias. Donde se presentan,
-// lo útil es ver cómo votó el Frente Amplio, del que heredan posiciones.
+// Compromís-FV and UPC have no voting record of their own, so where they run we show the Frente Amplio votes.
 export const representedIn = (party, place) => runsIn(party, place) || partiesIn(place).some(p => p.base === party.id);
 
 export function viability(party, place) {
   if (!place?.ccaa) return party.v._ ?? Object.values(party.v)[0];
   const label = (place.prov && party.vp?.[place.prov]) || party.v[place.ccaa] || party.v._;
-  // En una provincia que reparte tres escaños o menos solo los dos grandes y los partidos
-  // que se juegan esa provincia en concreto tienen opciones reales.
+  // With three seats or fewer, only the two big parties and province-specific lists have a real chance.
   const local = party.only || party.vp;
   if (place.prov && seatsOf(place) <= SMALL_CONSTITUENCY && !local && !SAFE_IN_SMALL.has(party.id) && label !== 'nc') {
     return SMALL_OVERRIDE[party.id] ?? 'improbable';
